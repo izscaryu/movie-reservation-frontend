@@ -26,14 +26,6 @@ export function AdminPage() {
   return <Placeholder title="Admin dashboard" slice="Slice 7" />;
 }
 
-export function LoginPage() {
-  return <Placeholder title="Log in" slice="Slice 2" />;
-}
-
-export function SignupPage() {
-  return <Placeholder title="Sign up" slice="Slice 2" />;
-}
-
 export function NotFoundPage() {
   return (
     <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-8 text-center">
