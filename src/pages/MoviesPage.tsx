@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { getMovies } from '../api/movies';
+import { formatDuration } from '../lib/format';
 
 const PAGE_SIZE = 12;
 
@@ -69,27 +71,29 @@ export default function MoviesPage() {
           ) : (
             <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {data.content.map((movie) => (
-                <li
-                  key={movie.id}
-                  className="flex flex-col rounded-lg border border-slate-800 bg-slate-900/50 p-4"
-                >
-                  <h2 className="text-lg font-semibold">{movie.title}</h2>
-                  <p className="mt-1 text-sm text-slate-400">{movie.durationMinutes} min</p>
-                  {movie.genres.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {movie.genres.map((g) => (
-                        <span
-                          key={g}
-                          className="rounded-full bg-slate-800 px-2 py-0.5 text-xs text-slate-300"
-                        >
-                          {g}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  {movie.description && (
-                    <p className="mt-3 line-clamp-3 text-sm text-slate-400">{movie.description}</p>
-                  )}
+                <li key={movie.id}>
+                  <Link
+                    to={`/movies/${movie.id}`}
+                    className="flex h-full flex-col rounded-lg border border-slate-800 bg-slate-900/50 p-4 transition-colors hover:border-slate-600 hover:bg-slate-900"
+                  >
+                    <h2 className="text-lg font-semibold">{movie.title}</h2>
+                    <p className="mt-1 text-sm text-slate-400">{formatDuration(movie.durationMinutes)}</p>
+                    {movie.genres.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {movie.genres.map((g) => (
+                          <span
+                            key={g}
+                            className="rounded-full bg-slate-800 px-2 py-0.5 text-xs text-slate-300"
+                          >
+                            {g}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {movie.description && (
+                      <p className="mt-3 line-clamp-3 text-sm text-slate-400">{movie.description}</p>
+                    )}
+                  </Link>
                 </li>
               ))}
             </ul>

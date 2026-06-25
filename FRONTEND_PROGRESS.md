@@ -54,7 +54,7 @@ Access token exp − iat = 900s (15 min). This is why the 401 refresh must be si
 - [x] **Slice 2 — Auth layer.** login/signup; access-token-in-memory + refresh-token in
       localStorage; Bearer-attaching wrapper; **single-flight** refresh-on-401; silent
       re-login on load; logout; route guards (authed + ADMIN). Proven; STOP + report.
-- [ ] Slice 3 — Browse (movies list + filter, detail, showtimes-by-date).
+- [x] Slice 3 — Browse (movies list + filter, detail, showtimes-by-date).
 - [ ] Slice 4 — Seat picker + 409 which-seats-failed handling.
 - [ ] Slice 5 — Hold countdown (display-only) + confirm + confirm-after-expiry 409.
 - [ ] Slice 6 — My reservations (paginated upcoming/past, cancel).
@@ -97,3 +97,15 @@ Single-flight is kept anyway, because it's still the correct client design:
 2. The backend's leniency is build/timing-dependent; the documented contract is reuse
    detection + rotation, and single-flight is the only design that's safe regardless.
 3. It's strictly cheaper: one `/refresh` per burst, deterministic stored token, no churn.
+
+- Slice 3 (done, pushed): browse.
+  - `src/pages/MoviesPage.tsx`: cards now link to `/movies/:id`; duration formatted.
+  - `src/pages/MovieDetailPage.tsx`: movie detail (poster/title/duration/genres/desc,
+    404 handled) + a showtimes section with a date filter. Default is **all upcoming**
+    (no `?date=`), because the seed data is sparse and a specific day is usually empty;
+    showtimes are grouped by day and each links to `/showtimes/:id/seats`.
+  - `src/lib/format.ts`: shared date/time/price/duration formatters (LocalDateTime
+    strings have no TZ → parsed as local for display).
+  - Contract verified live: `/api/movies/{id}` 404s with the uniform error body for a
+    missing id; `/api/movies/{id}/showtimes` returns an array, `?date=YYYY-MM-DD` filters,
+    an empty day returns `[]`.

@@ -1,11 +1,11 @@
 import { Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
 import MoviesPage from './pages/MoviesPage';
+import MovieDetailPage from './pages/MovieDetailPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import {
   AdminPage,
-  MovieDetailPage,
   NotFoundPage,
   ReservationsPage,
   SeatPickerPage,
