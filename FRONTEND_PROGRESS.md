@@ -56,7 +56,7 @@ Access token exp − iat = 900s (15 min). This is why the 401 refresh must be si
       re-login on load; logout; route guards (authed + ADMIN). Proven; STOP + report.
 - [x] Slice 3 — Browse (movies list + filter, detail, showtimes-by-date).
 - [x] Slice 4 — Seat picker + 409 which-seats-failed handling.
-- [ ] Slice 5 — Hold countdown (display-only) + confirm + confirm-after-expiry 409.
+- [x] Slice 5 — Hold countdown (display-only) + confirm + confirm-after-expiry 409.
 - [ ] Slice 6 — My reservations (paginated upcoming/past, cancel).
 - [ ] Slice 7 — Admin dashboard (movie CRUD, showtime create, 4 reports, admin reservations).
 - [ ] Slice 8 — Polish + README + two-tab overbooking demo.
@@ -128,6 +128,33 @@ Single-flight is kept anyway, because it's still the correct client design:
   - v1 concurrency approach = **refresh-on-conflict** (no auto-poll), which is both the
     documented v1 choice and what keeps the two-tab 409 demo reliably reproducible. A
     manual "Refresh map" button is provided.
+
+- Slice 5 (done, pushed): hold countdown + confirm.
+  - `src/hooks/useCountdown.ts`: 1-second countdown to `expiresAt`. **Display-only**
+    (landmine #2) — the Confirm button is never gated on it; the server's 409 is
+    authoritative.
+  - `src/pages/HoldPage.tsx` (`/hold/:reservationId`, behind `RequireAuth`): receives the
+    PENDING hold via navigation state from the seat picker (no `GET /api/reservations/{id}`
+    exists, so a hard refresh falls back to a "check My reservations" pointer). Shows the
+    countdown + Confirm + Release-hold (DELETE). On confirm 200 → confirmed panel; on 409
+    → "Hold expired" panel with a path back to seats; 404 handled.
+  - `SeatPickerPage` now navigates to `/hold/:id` (state = the reservation) on a successful
+    hold instead of an inline panel.
+  - Confirm contract verified live: PENDING→200 (`CONFIRMED`, `expiresAt:null`);
+    already-confirmed / cancelled / **expired** → 409 `"Reservation N is not pending
+    (already confirmed, expired or cancelled)"`; non-existent or another user's → 404
+    (per-user scoped, no 403 leak). The expired path shares the confirmed/cancelled 409.
+
+### Live finding — server timestamps are UTC WITHOUT a `Z` (TZ landmine)
+
+`expiresAt` / `createdAt` / showtime `startTime` come back as zoneless LocalDateTime
+strings that are actually **UTC** (`"2026-06-25T18:14:10.92"`). Verified live: a fresh
+hold's `expiresAt` is `now+600s` only when parsed as UTC; parsed as browser-local (UTC+2
+here) it reads as already-expired by the offset (`-6600s`) — the countdown would show
+`0:00` instantly. Fix: `parseServerInstant()` appends `Z` to zoneless datetimes, and all
+formatters render with `timeZone: 'UTC'` so the displayed wall-clock equals the stored
+value with no off-by-offset or date-rollover across timezones. Locked by `format.test.ts`.
+This also corrected the Slice 3 showtime display, which had been parsing as local.
 
 ### Live finding — the 409 conflict body is a STRING, not structured
 

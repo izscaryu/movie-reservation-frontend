@@ -1,14 +1,13 @@
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getSeatMap } from '../api/movies';
 import { createReservation } from '../api/reservations';
 import { useAuth } from '../auth/AuthContext';
 import SeatGrid from '../components/SeatGrid';
 import { ApiError } from '../lib/http';
-import { formatDateTime, formatPrice } from '../lib/format';
 import { parseUnavailableSeatLabels } from '../lib/seatConflict';
-import type { ReservationResponse, SeatMapEntry } from '../types/api';
+import type { SeatMapEntry } from '../types/api';
 
 export default function SeatPickerPage() {
   const { showtimeId } = useParams<{ showtimeId: string }>();
@@ -20,7 +19,6 @@ export default function SeatPickerPage() {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [conflictLabels, setConflictLabels] = useState<Set<string>>(new Set());
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [hold, setHold] = useState<ReservationResponse | null>(null);
 
   const seatMapKey = ['seats', id];
 
@@ -49,11 +47,10 @@ export default function SeatPickerPage() {
     mutationFn: () =>
       createReservation({ showtimeId: id, showtimeSeatIds: [...selected] }),
     onSuccess: (reservation) => {
-      setHold(reservation);
-      setSelected(new Set());
-      setConflictLabels(new Set());
-      setErrorMessage(null);
+      // Hand the PENDING hold to the confirm page via navigation state (there's no
+      // GET /api/reservations/{id} to refetch it from).
       void queryClient.invalidateQueries({ queryKey: seatMapKey });
+      navigate(`/hold/${reservation.id}`, { state: { reservation } });
     },
     onError: async (err) => {
       if (err instanceof ApiError && err.status === 409) {
@@ -103,51 +100,6 @@ export default function SeatPickerPage() {
       <p className="rounded-md border border-red-900 bg-red-950/50 px-4 py-3 text-red-300">
         Failed to load seat map: {error instanceof Error ? error.message : 'unknown error'}
       </p>
-    );
-  }
-
-  // Successful hold — confirm flow (the countdown timer) arrives in Slice 5.
-  if (hold) {
-    return (
-      <div className="mx-auto max-w-md rounded-lg border border-emerald-900 bg-emerald-950/30 p-6">
-        <h1 className="text-xl font-semibold text-emerald-200">Seats held</h1>
-        <p className="mt-2 text-sm text-emerald-200/80">
-          {hold.seats.join(', ')} for <span className="font-medium">{hold.movieTitle}</span>.
-        </p>
-        <dl className="mt-4 space-y-1 text-sm text-slate-300">
-          <div className="flex justify-between">
-            <dt className="text-slate-400">Total</dt>
-            <dd>{formatPrice(hold.totalPrice)}</dd>
-          </div>
-          <div className="flex justify-between">
-            <dt className="text-slate-400">Status</dt>
-            <dd>{hold.status}</dd>
-          </div>
-          {hold.expiresAt && (
-            <div className="flex justify-between">
-              <dt className="text-slate-400">Hold expires</dt>
-              <dd>{formatDateTime(hold.expiresAt)}</dd>
-            </div>
-          )}
-        </dl>
-        <p className="mt-4 text-xs text-slate-400">
-          The confirm flow with the live countdown lands in Slice 5.
-        </p>
-        <div className="mt-5 flex gap-3">
-          <Link
-            to="/reservations"
-            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium hover:bg-indigo-500"
-          >
-            My reservations
-          </Link>
-          <button
-            onClick={() => setHold(null)}
-            className="rounded-md border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800"
-          >
-            Pick more seats
-          </button>
-        </div>
-      </div>
     );
   }
 

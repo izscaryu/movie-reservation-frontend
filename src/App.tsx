@@ -3,6 +3,7 @@ import Layout from './components/Layout';
 import MoviesPage from './pages/MoviesPage';
 import MovieDetailPage from './pages/MovieDetailPage';
 import SeatPickerPage from './pages/SeatPickerPage';
+import HoldPage from './pages/HoldPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import { AdminPage, NotFoundPage, ReservationsPage } from './pages/placeholders';
@@ -15,6 +16,14 @@ export default function App() {
         <Route index element={<MoviesPage />} />
         <Route path="movies/:movieId" element={<MovieDetailPage />} />
         <Route path="showtimes/:showtimeId/seats" element={<SeatPickerPage />} />
+        <Route
+          path="hold/:reservationId"
+          element={
+            <RequireAuth>
+              <HoldPage />
+            </RequireAuth>
+          }
+        />
         <Route
           path="reservations"
           element={

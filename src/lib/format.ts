@@ -1,26 +1,39 @@
-// Display helpers. The backend sends LocalDateTime strings with no timezone
-// (e.g. "2028-10-15T23:15:00"); the browser parses those as local time, which is
-// what we want to show.
+// Display helpers.
+//
+// The backend returns LocalDateTime strings in UTC but WITHOUT a zone designator
+// (e.g. "2028-10-15T23:15:00", and expiresAt "2026-06-25T18:14:10.92"). Verified
+// live: a fresh hold's expiresAt is now+600s only when parsed as UTC; parsed as
+// browser-local it reads as already-expired by the TZ offset. So we parse these as
+// UTC and render them in UTC, which shows exactly the stored wall-clock with no
+// off-by-offset or date-rollover surprises across timezones.
+
+/** Parse a backend timestamp as UTC (append Z when it carries no zone). */
+export function parseServerInstant(iso: string): Date {
+  const hasTime = iso.includes('T');
+  const hasZone = /[zZ]$|[+-]\d{2}:?\d{2}$/.test(iso);
+  return new Date(hasTime && !hasZone ? `${iso}Z` : iso);
+}
 
 const dateTimeFmt = new Intl.DateTimeFormat(undefined, {
   dateStyle: 'medium',
   timeStyle: 'short',
+  timeZone: 'UTC',
 });
 
-const dateFmt = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
+const dateFmt = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeZone: 'UTC' });
 
-const timeFmt = new Intl.DateTimeFormat(undefined, { timeStyle: 'short' });
+const timeFmt = new Intl.DateTimeFormat(undefined, { timeStyle: 'short', timeZone: 'UTC' });
 
 export function formatDateTime(iso: string): string {
-  return dateTimeFmt.format(new Date(iso));
+  return dateTimeFmt.format(parseServerInstant(iso));
 }
 
 export function formatDate(iso: string): string {
-  return dateFmt.format(new Date(iso));
+  return dateFmt.format(parseServerInstant(iso));
 }
 
 export function formatTime(iso: string): string {
-  return timeFmt.format(new Date(iso));
+  return timeFmt.format(parseServerInstant(iso));
 }
 
 /** Local YYYY-MM-DD for a <input type="date"> value and the ?date= query param. */
