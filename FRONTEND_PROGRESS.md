@@ -55,7 +55,7 @@ Access token exp − iat = 900s (15 min). This is why the 401 refresh must be si
       localStorage; Bearer-attaching wrapper; **single-flight** refresh-on-401; silent
       re-login on load; logout; route guards (authed + ADMIN). Proven; STOP + report.
 - [x] Slice 3 — Browse (movies list + filter, detail, showtimes-by-date).
-- [ ] Slice 4 — Seat picker + 409 which-seats-failed handling.
+- [x] Slice 4 — Seat picker + 409 which-seats-failed handling.
 - [ ] Slice 5 — Hold countdown (display-only) + confirm + confirm-after-expiry 409.
 - [ ] Slice 6 — My reservations (paginated upcoming/past, cancel).
 - [ ] Slice 7 — Admin dashboard (movie CRUD, showtime create, 4 reports, admin reservations).
@@ -109,3 +109,29 @@ Single-flight is kept anyway, because it's still the correct client design:
   - Contract verified live: `/api/movies/{id}` 404s with the uniform error body for a
     missing id; `/api/movies/{id}/showtimes` returns an array, `?date=YYYY-MM-DD` filters,
     an empty day returns `[]`.
+- Slice 4 (done, pushed): seat picker (the centerpiece).
+  - `src/components/SeatGrid.tsx`: rows grouped by `rowLabel`, seats by `seatNumber`,
+    colored by status (AVAILABLE/HELD/BOOKED) + selected + a rose ring for just-lost
+    seats. Only AVAILABLE seats are clickable.
+  - `src/pages/SeatPickerPage.tsx`: select seats → `POST /api/reservations` (via
+    `authFetch`). On success shows the PENDING hold (seats, total, expiresAt); the
+    countdown/confirm is Slice 5. Seat-map GET is public; reserving requires auth, so an
+    unauthenticated "Hold" routes to /login with the return path.
+  - **The 409 path (landmine #5):** the backend reports conflicts through the uniform
+    error body's `message`, naming seats by LABEL — verified live:
+    `{"status":409,"message":"Seats not available: A3, A4"}`. On 409 the UI parses those
+    labels (`src/lib/seatConflict.ts`, unit-tested), refetches the seat map (the lost
+    seats now render HELD), highlights them with a ring, drops them from the selection,
+    and shows "A3, A4 were just taken. Pick again." — not a generic toast.
+  - 400s are surfaced inline with the server message (`must not be empty`,
+    `One or more seat ids do not belong to showtime N`).
+  - v1 concurrency approach = **refresh-on-conflict** (no auto-poll), which is both the
+    documented v1 choice and what keeps the two-tab 409 demo reliably reproducible. A
+    manual "Refresh map" button is provided.
+
+### Live finding — the 409 conflict body is a STRING, not structured
+
+The kickoff says the 409 "body names WHICH seats failed." It does, but as a
+comma-separated **label** list inside `message` (`"Seats not available: A1, A2"`), not a
+structured `seats` array and not by id. `parseUnavailableSeatLabels` extracts them; mapping
+label→`showtimeSeatId` is done against the freshly-refetched map.

@@ -10,10 +10,6 @@ function Placeholder({ title, slice }: { title: string; slice: string }) {
   );
 }
 
-export function SeatPickerPage() {
-  return <Placeholder title="Seat picker" slice="Slice 4" />;
-}
-
 export function ReservationsPage() {
   return <Placeholder title="My reservations" slice="Slice 6" />;
 }

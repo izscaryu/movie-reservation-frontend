@@ -2,14 +2,10 @@ import { Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
 import MoviesPage from './pages/MoviesPage';
 import MovieDetailPage from './pages/MovieDetailPage';
+import SeatPickerPage from './pages/SeatPickerPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
-import {
-  AdminPage,
-  NotFoundPage,
-  ReservationsPage,
-  SeatPickerPage,
-} from './pages/placeholders';
+import { AdminPage, NotFoundPage, ReservationsPage } from './pages/placeholders';
 import { RequireAdmin, RequireAuth } from './auth/guards';
 
 export default function App() {
