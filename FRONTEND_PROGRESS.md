@@ -492,3 +492,23 @@ hold/ticket-stub) before Part 2 (polish states: loading/error/empty + responsive
 **Parts 1–2 complete.** Remaining: Part 3 (README — two-tab overbooking narrative) and Part 4
 (two-tab overbooking demo + Playwright GIF). `/style` still mounted; remove/gate before the slice
 closes.
+
+- Slice 8 — **Part 3 (done, pushed)**: README rewritten so the **headline mirrors the backend's
+  overbooking narrative, from the client side** — the backend guarantees one winner, so the story
+  here is *what the loser sees*: the 409 (a uniform body whose `message` names seats as a **string**,
+  `"Seats not available: C7"`) turned into "C7 was just taken. Pick again." with the seat re-rendering
+  `HELD` + the **vermilion ring**, never a generic error, never a seat shown sold twice. Mirrors the
+  backend README's shape/voice: anchored TOC, a `(the headline)` section, honest-scope framing,
+  tables. Sections: what it is · tech stack · the overbooking race (+ a two-tab "try it yourself" and
+  the **refresh-on-conflict, not websockets** rationale — deterministic for the demo) · architecture
+  (single-flight refresh / typed `http` / refetch-on-409 / server-driven pagination) · **Design**
+  (warm editorial × dark cinema, self-hosted font trio, ticket-stub signature, the five seat states)
+  · run steps · client auth · the verified landmines (UTC-without-`Z`, string 409 body, display-only
+  countdown, server-authoritative mutations) · project layout · what I'd add. Cross-links the backend
+  README's overbooking + auth sections. Left an HTML-comment **placeholder for the Part 4 GIF**.
+  Verified the run claims before asserting them: `.env.example` exists, `vite.config` really sets
+  `strictPort: true` on 5173.
+
+**Parts 1–3 complete.** Remaining: Part 4 (two-tab overbooking demo + Playwright GIF — first browser
+driver in the repo; rehearse manually, then gate so the GIF can be watched). `/style` still mounted;
+remove/gate as part of closing the slice.
