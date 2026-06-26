@@ -250,3 +250,41 @@ released, so no holds dangle.
 `MovieFormPage`, `AdminStub`, `api/admin.ts`, `App.tsx`) through the running dev server (all
 200). The rendered admin DOM was **not** clicked — left for the user's in-browser pass before
 Parts D/E (same bar as prior slices).
+
+- Slice 7 — **Part C (done, pushed)**: showtime create.
+  - `src/pages/admin/AdminShowtimesPage.tsx` (replaces the Showtimes stub): a create form —
+    movie `<select>`, numeric `theaterRoomId`, `datetime-local` start time, price. On success
+    shows the created showtime (movie · room · start→end · price, all formatted) and keeps
+    movie/room/price for quick repeat scheduling. Any non-2xx surfaces the server message.
+  - `src/api/admin.ts`: `createShowtime`. `src/api/movies.ts`: `getAllMovies` (pages through
+    at size 100 — the picker needs the full list; `size>100` → 400) feeding the movie select.
+  - `src/types/api.ts`: `ShowtimeRequest`.
+
+### Decision — `theaterRoomId` is out-of-band (no GET /rooms); future rooms endpoint is the fix
+
+There is **no rooms/theaters endpoint** in the API. The showtime-create form therefore takes
+a **raw numeric `theaterRoomId`** and relies on the server to reject an unknown id. To make
+this usable, the form shows an inline hint of the seeded rooms: **1 (Room 1, 40 seats), 2
+(Room 2, 80), 3 (Room 3, 54)** — read from the backend's `RoomSeatInitializer` (3 rooms,
+seeded in list order so ids 1–3); id 1 ↔ "Room 1" confirmed live (existing showtimes + the
+create echo below). **This is a known gap:** scheduling depends on out-of-band room-id
+knowledge. The real fix is a future `GET /api/rooms` (its own backend + frontend slice);
+until then the hint + server-side validation is the v1 stopgap.
+
+### Live finding — showtime `startTime` round-trip is clean (no +offset leak)
+
+The inverse of the Slice 5 read bug (writing a zoneless-UTC instant). Verified live, not just
+the 200: created a showtime `{movieId:113, theaterRoomId:1, startTime:"2037-03-15T09:45",
+price:13.50}` → **201**, body echoed `startTime:"2037-03-15T09:45:00"` (seconds normalized,
+**no offset shift**) with `endTime:"2037-03-15T11:25:00"` derived server-side. Then fetched
+`GET /api/movies/113/showtimes?date=2037-03-15` (the public view) and the row read the **same**
+`"2037-03-15T09:45:00"`. So the `datetime-local` value is sent **as-is, no conversion**, and
+because `format.ts` renders with `timeZone:'UTC'` the admin sees back exactly what they typed.
+Accepted format: `LocalDateTime` with optional seconds (`YYYY-MM-DDTHH:mm` accepted).
+Side effect: this verification left a real showtime **#146** (movie 113, Room 1, 2037-03-15
+09:45) in the DB — there's no delete-showtime endpoint, so it persists as harmless test data.
+
+**Verification scope (C):** the live create + round-trip above + `tsc`/`vite build` + `eslint`
+clean + Vite-transformed `AdminShowtimesPage` / `api/admin.ts` / `api/movies.ts` / `App.tsx`
+(all 200). DOM not clicked — the user will verify A+B and C in-browser (esp. the time
+round-trip) before D+E.

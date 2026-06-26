@@ -1,7 +1,7 @@
 // Admin-only API calls (behind the ADMIN role; the backend enforces 403, the UI
 // gates with RequireAdmin). Grows per Slice 7 part — this is Part A+B (movies).
 import { authFetch } from '../lib/session';
-import type { MovieRequest, MovieResponse } from '../types/api';
+import type { MovieRequest, MovieResponse, ShowtimeRequest, ShowtimeResponse } from '../types/api';
 
 /** Create a movie. 201 with the full MovieResponse. 400 (uniform body) on validation. */
 export function createMovie(body: MovieRequest): Promise<MovieResponse> {
@@ -16,4 +16,9 @@ export function updateMovie(id: number, body: MovieRequest): Promise<MovieRespon
 /** Soft-delete a movie. 204 (no body). Afterwards it drops out of GET /api/movies. */
 export function deleteMovie(id: number): Promise<void> {
   return authFetch(`/api/admin/movies/${id}`, { method: 'DELETE' });
+}
+
+/** Create a showtime. 201 with the full ShowtimeResponse (startTime echoed, endTime derived). */
+export function createShowtime(body: ShowtimeRequest): Promise<ShowtimeResponse> {
+  return authFetch('/api/admin/showtimes', { method: 'POST', json: body });
 }

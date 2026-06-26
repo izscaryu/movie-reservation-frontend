@@ -118,6 +118,22 @@ export interface MovieRequest {
   genres?: string[];
 }
 
+/**
+ * Admin create body for a showtime. `startTime` is a zoneless LocalDateTime string
+ * treated as UTC wall-clock (e.g. "2037-03-15T09:45") — sent exactly as the
+ * datetime-local input gives it, NO offset conversion (the inverse of the Slice 5
+ * read bug). Verified live: the backend echoes it back unchanged (seconds normalized
+ * to ":00") and the public showtimes view displays the same wall-clock. endTime is
+ * derived server-side from the movie duration. `theaterRoomId` is a raw id — there is
+ * no GET /rooms, so valid ids are out-of-band (seeded rooms 1–3). See FRONTEND_PROGRESS.
+ */
+export interface ShowtimeRequest {
+  movieId: number;
+  theaterRoomId: number;
+  startTime: string;
+  price: number;
+}
+
 export type ReservationStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'EXPIRED';
 
 export interface ReservationResponse {
