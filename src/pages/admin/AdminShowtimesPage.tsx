@@ -6,10 +6,8 @@ import { createShowtime } from '../../api/admin';
 import { ApiError } from '../../lib/http';
 import { formatDateTime, formatPrice } from '../../lib/format';
 import type { ShowtimeRequest, ShowtimeResponse } from '../../types/api';
-
-const inputClass =
-  'w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 outline-none focus:border-slate-500';
-const labelClass = 'mb-1 block text-sm text-slate-300';
+import Button from '../../components/ui/Button';
+import { Field, Input, Select } from '../../components/ui/Input';
 
 export default function AdminShowtimesPage() {
   const [movieId, setMovieId] = useState('');
@@ -49,39 +47,39 @@ export default function AdminShowtimesPage() {
 
   return (
     <div className="mx-auto max-w-lg">
-      <h2 className="text-lg font-semibold">Schedule a showtime</h2>
+      <h2 className="mb-5 font-display text-xl font-semibold text-paper">Schedule a showtime</h2>
 
       {created && (
-        <div className="mt-4 rounded-md border border-emerald-900 bg-emerald-950/30 p-4 text-sm">
-          <p className="font-medium text-emerald-200">Showtime created 🎬</p>
-          <p className="mt-1 text-emerald-200/80">
+        <div className="mb-5 rounded-md border border-status-confirmed/40 bg-status-confirmed/10 p-4 text-sm">
+          <p className="font-medium text-status-confirmed">Showtime created 🎬</p>
+          <p className="mt-1 text-paper-dim">
             {created.movieTitle} · {created.roomName} · {formatDateTime(created.startTime)} →{' '}
             {formatDateTime(created.endTime)} · {formatPrice(created.price)}
           </p>
-          <Link to={`/movies/${created.movieId}`} className="mt-2 inline-block text-indigo-400 hover:underline">
+          <Link
+            to={`/movies/${created.movieId}`}
+            className="mt-2 inline-block font-medium text-brass hover:text-brass-bright"
+          >
             View on the movie page →
           </Link>
         </div>
       )}
 
       {moviesQuery.isError && (
-        <p className="mt-4 rounded-md border border-red-900 bg-red-950/50 px-4 py-3 text-sm text-red-300">
-          Couldn't load the movie list: {moviesQuery.error instanceof Error ? moviesQuery.error.message : 'unknown'}
+        <p className="mb-5 rounded-md border border-status-expired/40 bg-status-expired/10 px-4 py-3 text-sm text-status-expired">
+          Couldn't load the movie list:{' '}
+          {moviesQuery.error instanceof Error ? moviesQuery.error.message : 'unknown'}
         </p>
       )}
 
-      <form onSubmit={onSubmit} className="mt-4 space-y-4">
-        <div>
-          <label htmlFor="movie" className={labelClass}>
-            Movie
-          </label>
-          <select
+      <form onSubmit={onSubmit} className="space-y-4">
+        <Field label="Movie" htmlFor="movie">
+          <Select
             id="movie"
             required
             value={movieId}
             onChange={(e) => setMovieId(e.target.value)}
             disabled={moviesQuery.isPending}
-            className={inputClass}
           >
             <option value="" disabled>
               {moviesQuery.isPending ? 'Loading movies…' : 'Select a movie…'}
@@ -91,52 +89,40 @@ export default function AdminShowtimesPage() {
                 {m.title}
               </option>
             ))}
-          </select>
-        </div>
+          </Select>
+        </Field>
 
-        <div>
-          <label htmlFor="room" className={labelClass}>
-            Theater room id
-          </label>
-          <input
+        <Field
+          label="Theater room id"
+          htmlFor="room"
+          hint="Seeded rooms: 1 (Room 1, 40 seats), 2 (Room 2, 80), 3 (Room 3, 54). An unknown id is rejected by the server."
+        >
+          <Input
             id="room"
             type="number"
             min={1}
             required
             value={theaterRoomId}
             onChange={(e) => setTheaterRoomId(e.target.value)}
-            className={inputClass}
           />
-          {/* No GET /rooms endpoint yet — valid ids are out-of-band. Seeded rooms: */}
-          <p className="mt-1 text-xs text-slate-500">
-            Seeded rooms: 1 (Room 1, 40 seats), 2 (Room 2, 80), 3 (Room 3, 54). An unknown id is
-            rejected by the server.
-          </p>
-        </div>
+        </Field>
 
-        <div>
-          <label htmlFor="start" className={labelClass}>
-            Start time
-          </label>
-          <input
+        <Field
+          label="Start time"
+          htmlFor="start"
+          hint="Stored and shown as entered (UTC wall-clock). End time is computed from the movie's duration."
+        >
+          <Input
             id="start"
             type="datetime-local"
             required
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
-            className={inputClass}
           />
-          <p className="mt-1 text-xs text-slate-500">
-            Stored and shown as entered (UTC wall-clock). End time is computed from the movie's
-            duration.
-          </p>
-        </div>
+        </Field>
 
-        <div>
-          <label htmlFor="price" className={labelClass}>
-            Price
-          </label>
-          <input
+        <Field label="Price" htmlFor="price">
+          <Input
             id="price"
             type="number"
             min={0}
@@ -144,23 +130,18 @@ export default function AdminShowtimesPage() {
             required
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            className={inputClass}
           />
-        </div>
+        </Field>
 
         {error && (
-          <p className="rounded-md border border-rose-800 bg-rose-950/50 px-3 py-2 text-sm text-rose-200">
+          <p className="rounded-md border border-status-expired/40 bg-status-expired/10 px-3 py-2 text-sm text-status-expired">
             {error}
           </p>
         )}
 
-        <button
-          type="submit"
-          disabled={mutation.isPending}
-          className="rounded-md bg-indigo-600 px-4 py-2 font-medium hover:bg-indigo-500 disabled:opacity-50"
-        >
+        <Button type="submit" disabled={mutation.isPending}>
           {mutation.isPending ? 'Creating…' : 'Create showtime'}
-        </button>
+        </Button>
       </form>
     </div>
   );

@@ -5,10 +5,11 @@ import { getMovie } from '../../api/movies';
 import { createMovie, updateMovie } from '../../api/admin';
 import { ApiError } from '../../lib/http';
 import type { MovieRequest } from '../../types/api';
-
-const inputClass =
-  'w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 outline-none focus:border-slate-500';
-const labelClass = 'mb-1 block text-sm text-slate-300';
+import { cn } from '../../lib/cn';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import { Field, Input, Textarea } from '../../components/ui/Input';
+import { buttonClasses } from '../../components/ui/buttonClasses';
 
 /** Shared create/edit form. Edit mode prefills from GET /api/movies/{id}. */
 export default function MovieFormPage() {
@@ -47,8 +48,7 @@ export default function MovieFormPage() {
   }, [movieQuery.data]);
 
   const mutation = useMutation({
-    mutationFn: (body: MovieRequest) =>
-      editing ? updateMovie(id, body) : createMovie(body),
+    mutationFn: (body: MovieRequest) => (editing ? updateMovie(id, body) : createMovie(body)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-movies'] });
       queryClient.invalidateQueries({ queryKey: ['movies'] });
@@ -77,119 +77,91 @@ export default function MovieFormPage() {
   }
 
   if (editing && movieQuery.isPending) {
-    return <p className="text-slate-400">Loading movie…</p>;
+    return <p className="text-paper-dim">Loading movie…</p>;
   }
   if (editing && movieQuery.isError) {
     const notFound = movieQuery.error instanceof ApiError && movieQuery.error.status === 404;
     return (
-      <div className="rounded-lg border border-rose-900 bg-rose-950/30 p-6">
-        <h2 className="text-lg font-semibold text-rose-200">
+      <Card className="border-status-expired/40">
+        <h2 className="font-display text-lg font-semibold text-status-expired">
           {notFound ? 'Movie not found' : 'Could not load the movie'}
         </h2>
-        <p className="mt-2 text-sm text-rose-200/80">
+        <p className="mt-2 text-sm text-paper-dim">
           {notFound
             ? 'It may have been deleted.'
             : movieQuery.error instanceof Error
               ? movieQuery.error.message
               : 'Unknown error.'}
         </p>
-        <Link
-          to="/admin/movies"
-          className="mt-4 inline-block rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium hover:bg-indigo-500"
-        >
+        <Link to="/admin/movies" className={cn('mt-5 inline-flex', buttonClasses())}>
           Back to movies
         </Link>
-      </div>
+      </Card>
     );
   }
 
   return (
     <div className="mx-auto max-w-lg">
-      <h2 className="text-lg font-semibold">{editing ? 'Edit movie' : 'New movie'}</h2>
-      <form onSubmit={onSubmit} className="mt-4 space-y-4">
-        <div>
-          <label htmlFor="title" className={labelClass}>
-            Title
-          </label>
-          <input
+      <h2 className="mb-5 font-display text-xl font-semibold text-paper">
+        {editing ? 'Edit movie' : 'New movie'}
+      </h2>
+      <form onSubmit={onSubmit} className="space-y-4">
+        <Field label="Title" htmlFor="title">
+          <Input
             id="title"
             type="text"
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className={inputClass}
           />
-        </div>
-        <div>
-          <label htmlFor="duration" className={labelClass}>
-            Duration (minutes)
-          </label>
-          <input
+        </Field>
+        <Field label="Duration (minutes)" htmlFor="duration">
+          <Input
             id="duration"
             type="number"
             min={1}
             required
             value={duration}
             onChange={(e) => setDuration(e.target.value)}
-            className={inputClass}
           />
-        </div>
-        <div>
-          <label htmlFor="genres" className={labelClass}>
-            Genres <span className="text-slate-500">(comma-separated)</span>
-          </label>
-          <input
+        </Field>
+        <Field label="Genres" htmlFor="genres" hint="Comma-separated">
+          <Input
             id="genres"
             type="text"
             value={genres}
             onChange={(e) => setGenres(e.target.value)}
             placeholder="Action, Drama"
-            className={inputClass}
           />
-        </div>
-        <div>
-          <label htmlFor="posterUrl" className={labelClass}>
-            Poster URL <span className="text-slate-500">(optional)</span>
-          </label>
-          <input
+        </Field>
+        <Field label="Poster URL" htmlFor="posterUrl" hint="Optional">
+          <Input
             id="posterUrl"
             type="url"
             value={posterUrl}
             onChange={(e) => setPosterUrl(e.target.value)}
-            className={inputClass}
           />
-        </div>
-        <div>
-          <label htmlFor="description" className={labelClass}>
-            Description <span className="text-slate-500">(optional)</span>
-          </label>
-          <textarea
+        </Field>
+        <Field label="Description" htmlFor="description" hint="Optional">
+          <Textarea
             id="description"
             rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className={inputClass}
           />
-        </div>
+        </Field>
 
         {error && (
-          <p className="rounded-md border border-rose-800 bg-rose-950/50 px-3 py-2 text-sm text-rose-200">
+          <p className="rounded-md border border-status-expired/40 bg-status-expired/10 px-3 py-2 text-sm text-status-expired">
             {error}
           </p>
         )}
 
         <div className="flex gap-3">
-          <button
-            type="submit"
-            disabled={mutation.isPending}
-            className="rounded-md bg-indigo-600 px-4 py-2 font-medium hover:bg-indigo-500 disabled:opacity-50"
-          >
+          <Button type="submit" disabled={mutation.isPending}>
             {mutation.isPending ? 'Saving…' : editing ? 'Save changes' : 'Create movie'}
-          </button>
-          <Link
-            to="/admin/movies"
-            className="rounded-md border border-slate-700 px-4 py-2 text-slate-300 hover:bg-slate-800"
-          >
+          </Button>
+          <Link to="/admin/movies" className={buttonClasses({ variant: 'secondary' })}>
             Cancel
           </Link>
         </div>

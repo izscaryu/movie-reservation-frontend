@@ -3,16 +3,14 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { getAdminReservations } from '../../api/admin';
 import type { AdminReservationsQuery } from '../../api/admin';
 import { formatDateTime, formatPrice } from '../../lib/format';
+import type { BadgeTone } from '../../components/ui/Badge';
 import type { ReservationStatus } from '../../types/api';
+import Badge from '../../components/ui/Badge';
+import Button from '../../components/ui/Button';
+import { Field, Input, Select } from '../../components/ui/Input';
+import { Table, TBody, TD, TH, THead, TR } from '../../components/ui/Table';
 
 const PAGE_SIZE = 20;
-
-const STATUS_BADGE: Record<ReservationStatus, string> = {
-  CONFIRMED: 'border-emerald-800 bg-emerald-950/40 text-emerald-200',
-  PENDING: 'border-amber-800 bg-amber-950/40 text-amber-200',
-  CANCELLED: 'border-slate-700 bg-slate-800/60 text-slate-400',
-  EXPIRED: 'border-rose-900 bg-rose-950/40 text-rose-300',
-};
 
 const STATUSES: ReservationStatus[] = ['PENDING', 'CONFIRMED', 'CANCELLED', 'EXPIRED'];
 // Curated to entity columns — the backend 400s on an unknown sort field.
@@ -20,9 +18,6 @@ const SORTS = [
   { value: 'createdAt', label: 'Created' },
   { value: 'totalPrice', label: 'Price' },
 ];
-
-const selectClass =
-  'rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-slate-500';
 
 type Filters = Required<Pick<AdminReservationsQuery, 'sort' | 'direction'>> &
   Pick<AdminReservationsQuery, 'status' | 'from' | 'to'>;
@@ -69,52 +64,54 @@ export default function AdminReservationsPage() {
 
   return (
     <div>
-      <h2 className="mb-4 text-lg font-semibold">Reservations</h2>
+      <h2 className="mb-5 font-display text-xl font-semibold text-paper">Reservations</h2>
 
-      <form onSubmit={apply} className="mb-5 flex flex-wrap items-end gap-3">
-        <Field label="Status">
-          <select value={status} onChange={(e) => setStatus(e.target.value)} className={selectClass}>
+      <form onSubmit={apply} className="mb-6 flex flex-wrap items-end gap-3">
+        <Field label="Status" htmlFor="f-status">
+          <Select id="f-status" value={status} onChange={(e) => setStatus(e.target.value)}>
             <option value="">All</option>
             {STATUSES.map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
-        <Field label="From">
-          <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className={selectClass} />
+        <Field label="From" htmlFor="f-from">
+          <Input id="f-from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
         </Field>
-        <Field label="To">
-          <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className={selectClass} />
+        <Field label="To" htmlFor="f-to">
+          <Input id="f-to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
         </Field>
-        <Field label="Sort by">
-          <select value={sort} onChange={(e) => setSort(e.target.value)} className={selectClass}>
+        <Field label="Sort by" htmlFor="f-sort">
+          <Select id="f-sort" value={sort} onChange={(e) => setSort(e.target.value)}>
             {SORTS.map((s) => (
               <option key={s.value} value={s.value}>
                 {s.label}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
-        <Field label="Order">
-          <select value={direction} onChange={(e) => setDirection(e.target.value as 'asc' | 'desc')} className={selectClass}>
+        <Field label="Order" htmlFor="f-order">
+          <Select
+            id="f-order"
+            value={direction}
+            onChange={(e) => setDirection(e.target.value as 'asc' | 'desc')}
+          >
             <option value="desc">Desc</option>
             <option value="asc">Asc</option>
-          </select>
+          </Select>
         </Field>
-        <button type="submit" className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium hover:bg-indigo-500">
-          Apply
-        </button>
-        <button type="button" onClick={reset} className="rounded-md border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800">
+        <Button type="submit">Apply</Button>
+        <Button type="button" variant="secondary" onClick={reset}>
           Reset
-        </button>
+        </Button>
       </form>
 
-      {isPending && <p className="text-slate-400">Loading reservations…</p>}
+      {isPending && <p className="text-paper-dim">Loading reservations…</p>}
 
       {isError && (
-        <p className="rounded-md border border-red-900 bg-red-950/50 px-4 py-3 text-red-300">
+        <p className="rounded-md border border-status-expired/40 bg-status-expired/10 px-4 py-3 text-sm text-status-expired">
           Failed to load reservations: {error instanceof Error ? error.message : 'unknown error'}
         </p>
       )}
@@ -122,72 +119,69 @@ export default function AdminReservationsPage() {
       {data && (
         <>
           {data.content.length === 0 ? (
-            <p className="text-slate-400">No reservations match these filters.</p>
+            <p className="text-paper-dim">No reservations match these filters.</p>
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-slate-800">
-              <table className="w-full text-sm">
-                <thead className="bg-slate-900/70 text-left text-slate-400">
-                  <tr>
-                    <th className="px-3 py-2 font-medium">#</th>
-                    <th className="px-3 py-2 font-medium">User</th>
-                    <th className="px-3 py-2 font-medium">Movie</th>
-                    <th className="px-3 py-2 font-medium">Showtime</th>
-                    <th className="px-3 py-2 font-medium">Status</th>
-                    <th className="px-3 py-2 font-medium">Created</th>
-                    <th className="px-3 py-2 text-right font-medium">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.content.map((r) => (
-                    <tr key={r.id} className="border-t border-slate-800">
-                      <td className="px-3 py-2 tabular-nums text-slate-400">{r.id}</td>
-                      <td className="px-3 py-2">
-                        <div className="font-medium">{r.userName}</div>
-                        <div className="text-xs text-slate-400">{r.userEmail}</div>
-                      </td>
-                      <td className="px-3 py-2">{r.movieTitle}</td>
-                      <td className="px-3 py-2 whitespace-nowrap">{formatDateTime(r.showtimeStartTime)}</td>
-                      <td className="px-3 py-2">
-                        <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[r.status]}`}>
-                          {r.status}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2 whitespace-nowrap text-slate-400">{formatDateTime(r.createdAt)}</td>
-                      <td className="px-3 py-2 text-right tabular-nums">{formatPrice(r.totalPrice)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <Table>
+              <THead>
+                <tr>
+                  <TH>#</TH>
+                  <TH>User</TH>
+                  <TH>Movie</TH>
+                  <TH>Showtime</TH>
+                  <TH>Status</TH>
+                  <TH>Created</TH>
+                  <TH numeric>Total</TH>
+                </tr>
+              </THead>
+              <TBody>
+                {data.content.map((r) => (
+                  <TR key={r.id}>
+                    <TD className="font-mono tabular-nums text-paper-faint">{r.id}</TD>
+                    <TD>
+                      <div className="font-medium text-paper">{r.userName}</div>
+                      <div className="text-xs text-paper-faint">{r.userEmail}</div>
+                    </TD>
+                    <TD className="text-paper">{r.movieTitle}</TD>
+                    <TD className="whitespace-nowrap">{formatDateTime(r.showtimeStartTime)}</TD>
+                    <TD>
+                      <Badge tone={r.status.toLowerCase() as BadgeTone}>{r.status}</Badge>
+                    </TD>
+                    <TD className="whitespace-nowrap">{formatDateTime(r.createdAt)}</TD>
+                    <TD numeric>{formatPrice(r.totalPrice)}</TD>
+                  </TR>
+                ))}
+              </TBody>
+            </Table>
           )}
 
           {/* Server-driven pagination — never compute totals client-side (landmine #6). */}
-          <div className="mt-4 flex items-center justify-between text-sm text-slate-400">
+          <div className="mt-4 flex items-center justify-between text-sm text-paper-faint">
             <span>
               Page {data.page + 1} of {Math.max(data.totalPages, 1)} · {data.totalElements} reservation
               {data.totalElements === 1 ? '' : 's'}
               {isFetching && ' · updating…'}
             </span>
             <div className="flex gap-2">
-              <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={data.first} className="rounded-md border border-slate-700 px-3 py-1.5 disabled:opacity-40 enabled:hover:bg-slate-800">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={data.first}
+              >
                 Previous
-              </button>
-              <button onClick={() => setPage((p) => p + 1)} disabled={data.last} className="rounded-md border border-slate-700 px-3 py-1.5 disabled:opacity-40 enabled:hover:bg-slate-800">
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setPage((p) => p + 1)}
+                disabled={data.last}
+              >
                 Next
-              </button>
+              </Button>
             </div>
           </div>
         </>
       )}
-    </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <label className="mb-1 block text-sm text-slate-300">{label}</label>
-      {children}
     </div>
   );
 }

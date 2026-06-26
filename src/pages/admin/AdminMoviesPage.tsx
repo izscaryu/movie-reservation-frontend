@@ -6,6 +6,10 @@ import { deleteMovie } from '../../api/admin';
 import { ApiError } from '../../lib/http';
 import { formatDuration } from '../../lib/format';
 import type { MovieResponse } from '../../types/api';
+import { cn } from '../../lib/cn';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import { buttonClasses } from '../../components/ui/buttonClasses';
 
 // The list reuses the public paged GET /api/movies (which already excludes
 // soft-deleted movies). Page size kept modest — the backend caps size (>100 → 400).
@@ -40,26 +44,23 @@ export default function AdminMoviesPage() {
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Movies</h2>
-        <Link
-          to="/admin/movies/new"
-          className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium hover:bg-indigo-500"
-        >
+      <div className="mb-5 flex items-center justify-between">
+        <h2 className="font-display text-xl font-semibold text-paper">Movies</h2>
+        <Link to="/admin/movies/new" className={buttonClasses()}>
           + New movie
         </Link>
       </div>
 
       {actionError && (
-        <p className="mb-4 rounded-md border border-rose-800 bg-rose-950/50 px-4 py-3 text-sm text-rose-200">
+        <p className="mb-4 rounded-md border border-status-expired/40 bg-status-expired/10 px-4 py-3 text-sm text-status-expired">
           {actionError}
         </p>
       )}
 
-      {isPending && <p className="text-slate-400">Loading movies…</p>}
+      {isPending && <p className="text-paper-dim">Loading movies…</p>}
 
       {isError && (
-        <p className="rounded-md border border-red-900 bg-red-950/50 px-4 py-3 text-red-300">
+        <p className="rounded-md border border-status-expired/40 bg-status-expired/10 px-4 py-3 text-sm text-status-expired">
           Failed to load movies: {error instanceof Error ? error.message : 'unknown error'}
         </p>
       )}
@@ -67,9 +68,9 @@ export default function AdminMoviesPage() {
       {data && (
         <>
           {data.content.length === 0 ? (
-            <p className="text-slate-400">No movies yet. Create one to get started.</p>
+            <p className="text-paper-dim">No movies yet. Create one to get started.</p>
           ) : (
-            <ul className="space-y-2">
+            <ul className="space-y-2.5">
               {data.content.map((m) => (
                 <MovieRow
                   key={m.id}
@@ -88,27 +89,29 @@ export default function AdminMoviesPage() {
           )}
 
           {/* Server-driven pagination — never compute totals client-side (landmine #6). */}
-          <div className="mt-6 flex items-center justify-between text-sm text-slate-400">
+          <div className="mt-6 flex items-center justify-between text-sm text-paper-faint">
             <span>
               Page {data.page + 1} of {Math.max(data.totalPages, 1)} · {data.totalElements} movie
               {data.totalElements === 1 ? '' : 's'}
               {isFetching && ' · updating…'}
             </span>
             <div className="flex gap-2">
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={data.first}
-                className="rounded-md border border-slate-700 px-3 py-1.5 disabled:opacity-40 enabled:hover:bg-slate-800"
               >
                 Previous
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => setPage((p) => p + 1)}
                 disabled={data.last}
-                className="rounded-md border border-slate-700 px-3 py-1.5 disabled:opacity-40 enabled:hover:bg-slate-800"
               >
                 Next
-              </button>
+              </Button>
             </div>
           </div>
         </>
@@ -128,50 +131,41 @@ interface RowProps {
 
 function MovieRow({ movie: m, confirming, busy, onAskDelete, onConfirmDelete, onDismiss }: RowProps) {
   return (
-    <li className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-slate-800 bg-slate-900/50 p-4">
-      <div className="min-w-0">
-        <p className="font-semibold">{m.title}</p>
-        <p className="mt-0.5 text-sm text-slate-400">
-          {formatDuration(m.durationMinutes)}
-          {m.genres.length > 0 && ` · ${m.genres.join(', ')}`}
-        </p>
-      </div>
-      <div className="flex shrink-0 items-center gap-2">
-        {confirming ? (
-          <>
-            <span className="text-sm text-slate-400">Delete this movie?</span>
-            <button
-              onClick={onConfirmDelete}
-              disabled={busy}
-              className="rounded-md bg-rose-600 px-3 py-1.5 text-sm font-medium hover:bg-rose-500 disabled:opacity-50"
-            >
-              {busy ? 'Deleting…' : 'Yes, delete'}
-            </button>
-            <button
-              onClick={onDismiss}
-              disabled={busy}
-              className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800 disabled:opacity-50"
-            >
-              Keep
-            </button>
-          </>
-        ) : (
-          <>
-            <Link
-              to={`/admin/movies/${m.id}/edit`}
-              className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800"
-            >
-              Edit
-            </Link>
-            <button
-              onClick={onAskDelete}
-              className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:border-rose-700 hover:bg-rose-950/40 hover:text-rose-200"
-            >
-              Delete
-            </button>
-          </>
-        )}
-      </div>
+    <li>
+      <Card className="flex flex-wrap items-center justify-between gap-4">
+        <div className="min-w-0">
+          <p className="font-display text-lg font-semibold text-paper">{m.title}</p>
+          <p className="mt-0.5 font-mono text-sm text-paper-faint">
+            {formatDuration(m.durationMinutes)}
+            {m.genres.length > 0 && ` · ${m.genres.join(', ')}`}
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          {confirming ? (
+            <>
+              <span className="text-sm text-paper-dim">Delete this movie?</span>
+              <Button variant="danger" size="sm" onClick={onConfirmDelete} disabled={busy}>
+                {busy ? 'Deleting…' : 'Yes, delete'}
+              </Button>
+              <Button variant="secondary" size="sm" onClick={onDismiss} disabled={busy}>
+                Keep
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link
+                to={`/admin/movies/${m.id}/edit`}
+                className={cn(buttonClasses({ variant: 'secondary', size: 'sm' }))}
+              >
+                Edit
+              </Link>
+              <Button variant="secondary" size="sm" onClick={onAskDelete}>
+                Delete
+              </Button>
+            </>
+          )}
+        </div>
+      </Card>
     </li>
   );
 }

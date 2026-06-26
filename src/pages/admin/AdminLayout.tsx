@@ -1,32 +1,40 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import { cn } from '../../lib/cn';
+import Eyebrow from '../../components/ui/Eyebrow';
 
 const subLink = ({ isActive }: { isActive: boolean }) =>
-  `rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-    isActive ? 'bg-indigo-600 text-white' : 'border border-slate-700 text-slate-300 hover:bg-slate-800'
-  }`;
+  cn(
+    'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+    isActive
+      ? 'bg-brass text-ink'
+      : 'border border-ink-line text-paper-dim hover:bg-ink-raised hover:text-paper',
+  );
 
 /** Admin area shell: title + section sub-nav + the active section (Outlet). */
 export default function AdminLayout() {
   return (
     <div>
-      <h1 className="text-2xl font-bold">Admin</h1>
-      <nav className="mt-4 flex flex-wrap gap-2 border-b border-slate-800 pb-4">
-        <NavLink to="/admin/movies" className={subLink}>
-          Movies
-        </NavLink>
-        <NavLink to="/admin/showtimes" className={subLink}>
-          Showtimes
-        </NavLink>
-        <NavLink to="/admin/reports" className={subLink}>
-          Reports
-        </NavLink>
-        <NavLink to="/admin/reservations" className={subLink}>
-          Reservations
-        </NavLink>
-      </nav>
-      <div className="mt-6">
-        <Outlet />
+      <div className="mb-8 border-b border-ink-line pb-5">
+        <Eyebrow>The Orpheum</Eyebrow>
+        <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-paper">
+          Admin
+        </h1>
+        <nav className="mt-5 flex flex-wrap gap-2">
+          <NavLink to="/admin/movies" className={subLink}>
+            Movies
+          </NavLink>
+          <NavLink to="/admin/showtimes" className={subLink}>
+            Showtimes
+          </NavLink>
+          <NavLink to="/admin/reports" className={subLink}>
+            Reports
+          </NavLink>
+          <NavLink to="/admin/reservations" className={subLink}>
+            Reservations
+          </NavLink>
+        </nav>
       </div>
+      <Outlet />
     </div>
   );
 }

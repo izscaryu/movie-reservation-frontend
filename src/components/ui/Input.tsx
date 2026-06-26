@@ -1,5 +1,10 @@
 import { forwardRef } from 'react';
-import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react';
+import type {
+  InputHTMLAttributes,
+  ReactNode,
+  SelectHTMLAttributes,
+  TextareaHTMLAttributes,
+} from 'react';
 import { cn } from '../../lib/cn';
 
 const fieldBase =
@@ -18,6 +23,12 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
         {children}
       </select>
     );
+  },
+);
+
+export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement>>(
+  function Textarea({ className, ...rest }, ref) {
+    return <textarea ref={ref} className={cn(fieldBase, 'resize-y', className)} {...rest} />;
   },
 );
 
