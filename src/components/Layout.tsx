@@ -1,10 +1,12 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { cn } from '../lib/cn';
+import Button from './ui/Button';
+import { buttonClasses } from './ui/buttonClasses';
 
+const linkBase = 'text-xs font-semibold uppercase tracking-[0.12em] transition-colors';
 const linkClass = ({ isActive }: { isActive: boolean }) =>
-  `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-    isActive ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
-  }`;
+  cn(linkBase, isActive ? 'text-brass' : 'text-paper-dim hover:text-paper');
 
 export default function Layout() {
   const { isAuthenticated, isAdmin, user, logout } = useAuth();
@@ -16,18 +18,24 @@ export default function Layout() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur">
-        <nav className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3">
-          <NavLink to="/" className="mr-4 text-lg font-bold tracking-tight">
-            🎬 Reservations
+    <div className="flex min-h-screen flex-col">
+      <header className="sticky top-0 z-20 border-b border-ink-line bg-ink/80 backdrop-blur">
+        <nav className="mx-auto flex max-w-6xl items-center gap-6 px-4 py-4">
+          <NavLink
+            to="/"
+            className="mr-2 inline-flex items-center gap-2 font-display text-lg font-semibold tracking-tight text-paper"
+          >
+            <span aria-hidden className="text-brass">
+              ◆
+            </span>
+            The Orpheum
           </NavLink>
           <NavLink to="/" end className={linkClass}>
-            Movies
+            Now Showing
           </NavLink>
           {isAuthenticated && (
             <NavLink to="/reservations" className={linkClass}>
-              My Reservations
+              My Tickets
             </NavLink>
           )}
           {isAdmin && (
@@ -36,23 +44,20 @@ export default function Layout() {
             </NavLink>
           )}
 
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-4">
             {isAuthenticated ? (
               <>
-                <span className="text-sm text-slate-400">{user?.email}</span>
-                <button
-                  onClick={onLogout}
-                  className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800"
-                >
+                <span className="hidden text-xs text-paper-faint sm:inline">{user?.email}</span>
+                <Button variant="secondary" size="sm" onClick={onLogout}>
                   Log out
-                </button>
+                </Button>
               </>
             ) : (
               <>
                 <NavLink to="/login" className={linkClass}>
                   Log in
                 </NavLink>
-                <NavLink to="/signup" className={linkClass}>
+                <NavLink to="/signup" className={buttonClasses({ size: 'sm' })}>
                   Sign up
                 </NavLink>
               </>
@@ -60,7 +65,7 @@ export default function Layout() {
           </div>
         </nav>
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:py-12">
         <Outlet />
       </main>
     </div>
