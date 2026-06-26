@@ -463,3 +463,32 @@ user review of the direction at `/style` before any page-by-page rollout (1b+).*
 
 **Part 1 (restyle) complete.** STOP gate: awaiting user in-browser review (esp. the seat picker +
 hold/ticket-stub) before Part 2 (polish states: loading/error/empty + responsive seat grid).
+
+> Part 1 reviewed in-browser and approved; proceeded to Part 2.
+
+- Slice 8 — **Part 2 (done, pushed)**: polish states + responsive seat grid. **Presentation
+  only.** Unified the loading/error/empty patterns that were copy-pasted inline across pages into
+  shared primitives, so feedback speaks in one voice:
+  - **New primitives** in `src/components/ui/`: `Alert` (tones error/success/warning/info, with
+    `role=alert|status`), `EmptyState` (title + message + optional action — an invitation, not a
+    dead end), `Spinner` (brass ring, `motion-reduce:animate-none`), `Loading` (spinner + label),
+    `Skeleton` (pulsing block, reduced-motion aware).
+  - **Sweep:** every inline `border-status-expired/10…` error banner → `<Alert>`; success/warning
+    notices → `<Alert tone=…>`; `Loading…` text → `<Loading>` (or skeletons). **Movies grid** and
+    the **seat map** now load as **skeletons** (the two heaviest first paints); page-level empties
+    (Movies, My tickets, Admin movies) → `EmptyState` with a CTA. The seat-picker 409 "pick again"
+    message deliberately keeps its **vermilion** (`alert`) styling — it matches the lost-seat ring,
+    not a generic red error.
+  - **Responsive seat grid:** seats `h-7 w-7` → `sm:h-8 sm:w-8`, gaps/row-label tighten on mobile,
+    `overflow-x-auto` retained as the graceful fallback for the 80-seat room.
+  - **Quality floor:** global `:focus-visible` brass outline + `prefers-reduced-motion` block
+    (from 1a) confirmed; spinner/skeleton also opt out of motion individually.
+  - `/style` gains a **States** section (Alerts / Loading / Empty) so the design system stays
+    complete as living reference.
+  - **Verification:** `vite build` (128 modules), `eslint` clean, `vitest` 11/11, dev-server
+    transforms 200 across the new primitives + swept pages. DOM not auto-clicked (browser driver
+    arrives in Part 4).
+
+**Parts 1–2 complete.** Remaining: Part 3 (README — two-tab overbooking narrative) and Part 4
+(two-tab overbooking demo + Playwright GIF). `/style` still mounted; remove/gate before the slice
+closes.
