@@ -58,7 +58,7 @@ Access token exp − iat = 900s (15 min). This is why the 401 refresh must be si
 - [x] Slice 4 — Seat picker + 409 which-seats-failed handling.
 - [x] Slice 5 — Hold countdown (display-only) + confirm + confirm-after-expiry 409.
 - [x] Slice 6 — My reservations (paginated upcoming/past, cancel).
-- [ ] Slice 7 — Admin dashboard (movie CRUD, showtime create, 4 reports, admin reservations).
+- [x] Slice 7 — Admin dashboard (movie CRUD, showtime create, 4 reports, admin reservations).
 - [ ] Slice 8 — Polish + README + two-tab overbooking demo.
 
 Out of scope (v1): realtime/websocket seat updates (poll / refresh-on-conflict),
@@ -319,3 +319,30 @@ verification cancelled a couple of confirmed reservations.)
 **Verification scope (D):** live contract re-confirmation above (incl. empty-range = 200) + `tsc`/
 `vite build` + `eslint` clean + Vite-transformed `AdminReportsPage` / `api/admin.ts` / `types/api.ts`
 / `App.tsx` (all 200). DOM not auto-clicked (no browser driver — same bar as prior slices).
+
+- Slice 7 — **Part E (done, pushed)** — completes Slice 7: admin reservations (read-only).
+  - `src/pages/admin/AdminReservationsPage.tsx` (replaces the Reservations stub): a paged,
+    filterable table over `GET /api/admin/reservations` using the richer admin row. Filter bar
+    (draft state, applied on **Apply** so the query fires once): status `<select>` (All + the 4
+    statuses), `from`/`to` date inputs, sort `<select>` (**Created / Price** — curated to entity
+    columns, since an unknown sort field 400s), and order (Desc/Asc, defaults `createdAt`/`desc`
+    to match the backend). Columns: id, user (name + email), movie, showtime (`showtimeStartTime`
+    via `formatDateTime` UTC), a status badge, created (`createdAt` UTC), total (`formatPrice`).
+    Server-driven pagination (renders `page`/`totalPages`/`totalElements`/`first`/`last`). No
+    actions — admin reservations are view-only in v1.
+  - `src/api/admin.ts`: `getAdminReservations` (+ `AdminReservationsQuery`); `src/types/api.ts`:
+    `AdminReservationResponse` (these landed with the Part D commit). Removed the now-unused
+    `AdminStub` (every admin section is real).
+
+### Live finding (Part E grounding) — admin-reservations filter/sort contract
+
+`from`/`to` are **dates** (`yyyy-MM-dd` → 200; a datetime with `T` → **400**), so the table uses
+date inputs. `sort`/`direction` work (`totalPrice` asc → `10,10,10`; desc → `40,30,30`); an
+**unknown sort field → 400**, which is why the sort dropdown is limited to confirmed columns
+(`createdAt`, `totalPrice`). `status` filters (`CANCELLED` → 11 rows); no-filter → 200. The admin
+row uses **`showtimeStartTime`** (not `startTime`) and carries `userEmail`/`userName`; no `seats`.
+
+**Verification scope (E):** live filter/sort/pagination contract above + `tsc`/`vite build` +
+`eslint` clean + Vite-transformed `AdminReservationsPage` / `App.tsx` (200). DOM not auto-clicked.
+
+**Slice 7 complete (A–E).** Remaining: Slice 8 — polish + README + two-tab overbooking demo.

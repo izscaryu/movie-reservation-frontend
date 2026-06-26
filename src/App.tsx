@@ -12,7 +12,7 @@ import AdminMoviesPage from './pages/admin/AdminMoviesPage';
 import MovieFormPage from './pages/admin/MovieFormPage';
 import AdminShowtimesPage from './pages/admin/AdminShowtimesPage';
 import AdminReportsPage from './pages/admin/AdminReportsPage';
-import AdminStub from './pages/admin/AdminStub';
+import AdminReservationsPage from './pages/admin/AdminReservationsPage';
 import { NotFoundPage } from './pages/placeholders';
 import { RequireAdmin, RequireAuth } from './auth/guards';
 
@@ -53,10 +53,7 @@ export default function App() {
           <Route path="movies/:movieId/edit" element={<MovieFormPage />} />
           <Route path="showtimes" element={<AdminShowtimesPage />} />
           <Route path="reports" element={<AdminReportsPage />} />
-          <Route
-            path="reservations"
-            element={<AdminStub title="Admin reservations" part="Part E" />}
-          />
+          <Route path="reservations" element={<AdminReservationsPage />} />
           <Route path="*" element={<Navigate to="/admin/movies" replace />} />
         </Route>
         <Route path="login" element={<LoginPage />} />
