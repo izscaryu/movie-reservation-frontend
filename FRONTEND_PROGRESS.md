@@ -346,3 +346,65 @@ row uses **`showtimeStartTime`** (not `startTime`) and carries `userEmail`/`user
 `eslint` clean + Vite-transformed `AdminReservationsPage` / `App.tsx` (200). DOM not auto-clicked.
 
 **Slice 7 complete (A–E).** Remaining: Slice 8 — polish + README + two-tab overbooking demo.
+
+- Slice 8 is staged into four parts (1 restyle · 2 polish states · 3 README · 4 two-tab
+  overbooking demo + Playwright GIF), and Part 1 is itself staged: **1a foundation →
+  1b+ page-by-page rollout**, each its own commit. The slice checkbox stays unticked until
+  Part 4. The user gates between parts; bold is spent in one place (the ticket stub) and kept
+  quiet everywhere else.
+
+- Slice 8 — **Part 1a (done, pushed)**: design foundation + `/style` preview. **Presentation
+  only — no logic, API, or page behavior touched.** Direction (approved before build): *"warm
+  editorial × dark cinema."* Deliberately breaks out of the AI-default near-black + single
+  acid-accent (which is exactly what the app had: `slate-950` + `indigo`) by going warm umber
+  near-black + **brass**, editorial **Fraunces**, and a monospace "ticket data" signature.
+  - **Tokens** (`tailwind.config.js`, **extend-only** so the default Tailwind palette stays
+    resolvable for not-yet-migrated pages during rollout): warm `ink` surfaces
+    (`#100D0A`/`#1A1510`/`#211A13`/`#2C2419`), `paper` text (`#F2EADB`/dim/faint), `brass`
+    (`#C49A3F` + `bright #ECB64A`), `danger`, `alert #F0644B` (the just-lost ring), `status.*`
+    (confirmed `#6E9466` / pending `#E8B44C` / cancelled `#847A6A` / expired `#C2533F` — four
+    mutually distinct hues; **brass is reserved for the brand, never a status**, so confirmed
+    vs pending can't collide), and `seat.*` (open/held/booked + text). `fontFamily`
+    display/sans/mono, `tracking.eyebrow`, `shadow.card`/`glow`, fade-in/rise keyframes.
+  - **Fonts self-hosted (no CDN, no runtime third-party dep)** — decision per the user:
+    offline-reliable for the demo/Playwright capture, no swap-in flash. Latin-subset `woff2`
+    vendored in `public/fonts/`, `@font-face` in `index.css`, preloaded `crossorigin` in
+    `index.html`. **Fraunces + Hanken Grotesk are variable** (one file each, full weight range;
+    Fraunces carries the `opsz` axis → display contrast via `font-optical-sizing: auto`);
+    **IBM Plex Mono is static** (one file per weight actually used: 400/500/600). 5 files,
+    ~116 KB total. Pulled from Google's css2 `latin` block and committed (the css2 inspection
+    confirmed the variable-vs-static split above).
+  - **Shared primitives** in `src/components/ui/`: `Button` (primary/secondary/ghost/danger ×
+    sm/md/lg + fullWidth; `buttonClasses` split into its own module so a `<Link>` can reuse the
+    exact classes during rollout), `Card` (topRule/interactive/padded), `Input`/`Select`/`Field`,
+    `Badge` (6 tones — reservation tone names are just the lowercased status), `Table`
+    (`Table`/`THead`/`TBody`/`TR`/`TH`/`TD`, `numeric` → right-aligned mono), `Eyebrow`,
+    `PageHeader`, and **`TicketStub`** — the signature: a perforated tear-off (bg-`ink` notches
+    straddle the edges to punch the card), brass marquee header, monospace "printed" data.
+    `src/lib/cn.ts` is a dependency-free class joiner. Files are component-only exports (keeps
+    `react-refresh` / eslint clean).
+  - **`/style` preview** (`StylePreviewPage`, **TEMPORARY**, standalone route in `App.tsx`
+    *outside* the un-migrated `Layout` — remove after Part 1 rollout): renders the marquee
+    header mock, palette, the type trio, buttons, inputs, cards, badges, the **five seat states
+    side by side** + a live picker row with the **vermilion just-lost ring**, the editorial
+    table, and the ticket stub. Built specifically to discharge the user's guardrail — confirm
+    at a glance that **brass-selected vs ocher-held (hatched) are unmistakable** and the lost
+    ring **punches** (it's the payload of the 409 flow, must read on camera).
+
+### Decision (Part 1a) — seat/badge hues retuned into the palette, semantics frozen
+
+Approved: retune all seat + badge colors into the warm palette while keeping **all five seat
+states and four badge states as mutually distinct as before** (semantics over palette). Notably
+**selected moves `indigo` → `brass`** (so it matches the brand and stays distinct from HELD's
+muted ocher, which also gets a diagonal hatch); BOOKED → oxblood, the just-lost ring → vermilion
+`#F0644B`. The retune lands in `SeatGrid`/badges during 1b+ rollout — 1a only defines the tokens
+and proves them on `/style`. House named **"The Orpheum"** (approved — a named house reads less
+templated).
+
+**Verification scope (1a):** `tsc -b && vite build` (122 modules; CSS 25.46 kB with the tokens +
+`@font-face` compiled; the 5 fonts copied to `dist/fonts`) + `eslint` clean + `vitest` 11/11
+green (format/session/seatConflict regression — auth + TZ + 409-parse logic untouched and still
+pass) + dev-server live checks: `GET /style` → 200, `GET /fonts/fraunces-var-latin.woff2` → 200
+`font/woff2`, and `StylePreviewPage` + `TicketStub` transform to valid JS. DOM not auto-clicked
+(no browser driver in the repo until Part 4 — same bar as prior slices). **STOP gate: awaiting
+user review of the direction at `/style` before any page-by-page rollout (1b+).**

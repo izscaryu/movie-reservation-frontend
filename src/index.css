@@ -2,12 +2,83 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ----------------------------------------------------------------------------
+   Self-hosted fonts (latin subset, woff2) — no CDN, no runtime third-party dep.
+   Fraunces & Hanken Grotesk are variable (one file each, full weight range, and
+   Fraunces carries the opsz axis used for display contrast). IBM Plex Mono is
+   static, one file per weight actually used (400/500/600).
+---------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/fraunces-var-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Hanken Grotesk';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/hanken-grotesk-var-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/ibm-plex-mono-400-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/ibm-plex-mono-500-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/ibm-plex-mono-600-latin.woff2') format('woff2');
+}
+
 :root {
   color-scheme: dark;
 }
 
-body {
-  @apply bg-slate-950 text-slate-100 antialiased;
-  margin: 0;
-  min-height: 100vh;
+@layer base {
+  body {
+    @apply bg-ink font-sans text-paper antialiased;
+    margin: 0;
+    min-height: 100vh;
+  }
+
+  /* Large Fraunces auto-engages a higher optical size for display contrast. */
+  .font-display {
+    font-optical-sizing: auto;
+  }
+
+  ::selection {
+    background-color: rgba(196, 154, 63, 0.3);
+    color: #f2eadb;
+  }
+
+  :focus-visible {
+    outline: 2px solid #c49a3f;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }

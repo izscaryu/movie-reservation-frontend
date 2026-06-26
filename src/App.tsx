@@ -14,11 +14,14 @@ import AdminShowtimesPage from './pages/admin/AdminShowtimesPage';
 import AdminReportsPage from './pages/admin/AdminReportsPage';
 import AdminReservationsPage from './pages/admin/AdminReservationsPage';
 import { NotFoundPage } from './pages/placeholders';
+import StylePreviewPage from './pages/StylePreviewPage';
 import { RequireAdmin, RequireAuth } from './auth/guards';
 
 export default function App() {
   return (
     <Routes>
+      {/* TEMPORARY (Slice 8 / Part 1a): standalone design-foundation preview. */}
+      <Route path="style" element={<StylePreviewPage />} />
       <Route element={<Layout />}>
         <Route index element={<MoviesPage />} />
         <Route path="movies/:movieId" element={<MovieDetailPage />} />
