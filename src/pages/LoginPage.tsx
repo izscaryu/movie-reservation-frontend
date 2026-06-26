@@ -2,6 +2,10 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../lib/http';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import Eyebrow from '../components/ui/Eyebrow';
+import { Field, Input } from '../components/ui/Input';
 
 interface LocationState {
   from?: { pathname: string };
@@ -41,63 +45,58 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto max-w-sm">
-      <h1 className="mb-6 text-2xl font-bold">Log in</h1>
-      {justSignedUp && (
-        <p className="mb-4 rounded-md border border-emerald-900 bg-emerald-950/40 px-3 py-2 text-sm text-emerald-300">
-          Account created — log in to continue.
-        </p>
-      )}
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="mb-1 block text-sm text-slate-300">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 outline-none focus:border-slate-500"
-          />
+      <Card padded={false} className="overflow-hidden">
+        <div className="border-b border-ink-line px-6 py-5">
+          <Eyebrow>The Orpheum</Eyebrow>
+          <h1 className="mt-2 font-display text-2xl font-semibold text-paper">Log in</h1>
         </div>
-        <div>
-          <label htmlFor="password" className="mb-1 block text-sm text-slate-300">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 outline-none focus:border-slate-500"
-          />
-        </div>
+        <div className="px-6 py-6">
+          {justSignedUp && (
+            <p className="mb-4 rounded-md border border-status-confirmed/40 bg-status-confirmed/10 px-3 py-2 text-sm text-status-confirmed">
+              Account created — log in to continue.
+            </p>
+          )}
+          <form onSubmit={onSubmit} className="space-y-4">
+            <Field label="Email" htmlFor="email">
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </Field>
+            <Field label="Password" htmlFor="password">
+              <Input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </Field>
 
-        {error && (
-          <p className="rounded-md border border-red-900 bg-red-950/50 px-3 py-2 text-sm text-red-300">
-            {error}
+            {error && (
+              <p className="rounded-md border border-status-expired/40 bg-status-expired/10 px-3 py-2 text-sm text-status-expired">
+                {error}
+              </p>
+            )}
+
+            <Button type="submit" fullWidth disabled={submitting}>
+              {submitting ? 'Logging in…' : 'Log in'}
+            </Button>
+          </form>
+
+          <p className="mt-4 text-sm text-paper-dim">
+            No account?{' '}
+            <Link to="/signup" className="font-medium text-brass hover:text-brass-bright">
+              Sign up
+            </Link>
           </p>
-        )}
-
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-md bg-indigo-600 px-3 py-2 font-medium hover:bg-indigo-500 disabled:opacity-50"
-        >
-          {submitting ? 'Logging in…' : 'Log in'}
-        </button>
-      </form>
-
-      <p className="mt-4 text-sm text-slate-400">
-        No account?{' '}
-        <Link to="/signup" className="text-indigo-400 hover:underline">
-          Sign up
-        </Link>
-      </p>
+        </div>
+      </Card>
     </div>
   );
 }
