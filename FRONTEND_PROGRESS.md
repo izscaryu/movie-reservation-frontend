@@ -408,3 +408,24 @@ pass) + dev-server live checks: `GET /style` → 200, `GET /fonts/fraunces-var-l
 `font/woff2`, and `StylePreviewPage` + `TicketStub` transform to valid JS. DOM not auto-clicked
 (no browser driver in the repo until Part 4 — same bar as prior slices). **STOP gate: awaiting
 user review of the direction at `/style` before any page-by-page rollout (1b+).**
+
+- Slice 8 — **Part 1a craft pass (done, pushed)**: first `/style` review approved the *direction*
+  (palette / fonts / ticket stub / seat states — all kept) but flagged the foundation as reading
+  flat/unfinished — spacing + surface craft, not color. Fixed on `/style`, still presentation only:
+  - **Vertical rhythm scale** applied across the whole preview: tight *within* a group
+    (`gap-3` / `space-y-2`), generous *between* groups (sections `mb-20`, subgroups `mt-10` +
+    hairline + `pt-10`, header block `mb-8` with eyebrow→title at `mt-3`); more establishing top
+    air (`pt-20`) and a bigger gap below the hero. Subgroup labels added so structure reads.
+  - **Surface elevation** — dark-UI elevation comes from a catch-light top edge + a soft deep
+    ambient, not a flat drop shadow that vanishes on near-black: `shadow.card` reworked
+    (`inset` top highlight + layered ambient), `shadow.glow` strengthened and actually used (the
+    emphasis card). `ink.raised`/`field`/`line` nudged lighter so cards separate and hairlines
+    read; `Card` default padding `p-5`→`p-6`, plus a sectioned-card example showing header-over-
+    body padding hierarchy.
+  - **Table** de-cramped (this is the admin surface): rows taller, cells `px-3 py-3`→`px-5 py-4`,
+    `TH` `px-5 py-3.5`, a crisp `border-b` header rule over hairline row dividers.
+  - **Contrast** — `paper.dim` `#B3A795`→`#C8BCA9`, `paper.faint` `#847A6A`→`#9C9082`, so
+    captions/eyebrows clear AA on the ink background.
+  - **Verification:** `vite build` (122 modules, CSS 25.88 kB), `eslint` clean, `vitest` 11/11,
+    dev-server `GET /style` 200 + font 200 `font/woff2` + `StylePreviewPage` transform 200. STOP
+    gate still held — awaiting re-review of spacing/surfaces before 1b rollout.

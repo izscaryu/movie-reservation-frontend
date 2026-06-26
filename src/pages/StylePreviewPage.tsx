@@ -1,6 +1,9 @@
 // TEMPORARY — design-foundation preview for Slice 8 / Part 1a. Mounted at /style
 // so the visual direction can be reviewed on one screen before it is rolled out
 // across real pages. Remove once Part 1 rollout is complete.
+//
+// Vertical rhythm used throughout: tight WITHIN a group (gap-3 / space-y-2),
+// generous BETWEEN groups (section mb-20, subgroup mt-10 + hairline, header mb-8).
 import type { ReactNode } from 'react';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
@@ -14,9 +17,9 @@ import { cn } from '../lib/cn';
 
 export default function StylePreviewPage() {
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
+    <div className="mx-auto max-w-5xl px-6 pb-28 pt-20">
       {/* Marquee header mock — the direction for the global nav. */}
-      <div className="mb-12 flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-ink-line pb-5">
+      <div className="mb-16 flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-ink-line pb-5">
         <span className="font-display text-xl font-semibold tracking-tight text-paper">
           <span className="text-brass">◆</span> The Orpheum
         </span>
@@ -32,21 +35,23 @@ export default function StylePreviewPage() {
         </div>
       </div>
 
-      <PageHeader
-        eyebrow="Slice 8 · Foundation"
-        title="A house style for The Orpheum"
-        subtitle="Warm editorial × dark cinema. Bold spent in one place — the ticket stub — and kept quiet everywhere else. Review the tokens and primitives here before they roll across the pages."
-      />
+      <div className="mb-20">
+        <PageHeader
+          eyebrow="Slice 8 · Foundation"
+          title="A house style for The Orpheum"
+          subtitle="Warm editorial × dark cinema. Bold spent in one place — the ticket stub — and kept quiet everywhere else. Review the tokens, spacing, and surfaces here before they roll across the pages."
+        />
+      </div>
 
       {/* PALETTE ---------------------------------------------------------- */}
       <Section eyebrow="Palette" title="Warm near-black, brass accent">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <Swatch name="ink" hex="#100D0A" className="bg-ink" note="page" />
-          <Swatch name="ink.raised" hex="#1A1510" className="bg-ink-raised" note="cards" />
-          <Swatch name="ink.field" hex="#211A13" className="bg-ink-field" note="inputs" />
-          <Swatch name="ink.line" hex="#2C2419" className="bg-ink-line" note="borders" />
+          <Swatch name="ink.raised" hex="#1C1712" className="bg-ink-raised" note="cards" />
+          <Swatch name="ink.field" hex="#231C14" className="bg-ink-field" note="inputs" />
+          <Swatch name="ink.line" hex="#33291C" className="bg-ink-line" note="borders" />
           <Swatch name="paper" hex="#F2EADB" className="bg-paper" dark note="text" />
-          <Swatch name="paper.dim" hex="#B3A795" className="bg-paper-dim" dark note="secondary" />
+          <Swatch name="paper.dim" hex="#C8BCA9" className="bg-paper-dim" dark note="secondary" />
           <Swatch name="brass" hex="#C49A3F" className="bg-brass" dark note="accent" />
           <Swatch name="brass.bright" hex="#ECB64A" className="bg-brass-bright" dark note="hover/glow" />
         </div>
@@ -54,67 +59,79 @@ export default function StylePreviewPage() {
 
       {/* TYPE ------------------------------------------------------------- */}
       <Section eyebrow="Typography" title="Fraunces · Hanken Grotesk · IBM Plex Mono">
-        <div className="space-y-6">
-          <div>
-            <Caption>Display — Fraunces (self-hosted, variable, optical sizing)</Caption>
-            <p className="font-display text-5xl font-semibold leading-tight tracking-tight text-paper">
+        <div>
+          <SubLabel>Display — Fraunces (self-hosted, variable, optical sizing)</SubLabel>
+          <div className="space-y-2">
+            <p className="font-display text-5xl font-semibold leading-[1.05] tracking-tight text-paper">
               Now showing, in warm light
             </p>
-            <p className="mt-2 font-display text-3xl font-medium text-paper">
-              Dune: Part Two
-            </p>
+            <p className="font-display text-3xl font-medium text-paper">Dune: Part Two</p>
           </div>
-          <div className="border-t border-ink-line pt-6">
-            <Caption>Body — Hanken Grotesk</Caption>
-            <p className="max-w-2xl text-base leading-relaxed text-paper-dim">
-              A single-screen revival house. Pick a film, claim your seats, and hold them
-              while the projector warms up. The body face stays quiet so the display and the
-              brass can carry the personality.
-            </p>
-            <div className="mt-3 flex flex-wrap gap-4 text-sm">
-              <span className="font-normal text-paper">Regular 400</span>
-              <span className="font-medium text-paper">Medium 500</span>
-              <span className="font-semibold text-paper">Semibold 600</span>
-              <span className="font-bold text-paper">Bold 700</span>
-            </div>
+        </div>
+
+        <div className="mt-10 border-t border-ink-line pt-10">
+          <SubLabel>Body — Hanken Grotesk</SubLabel>
+          <p className="max-w-2xl text-base leading-relaxed text-paper-dim">
+            A single-screen revival house. Pick a film, claim your seats, and hold them while
+            the projector warms up. The body face stays quiet so the display and the brass can
+            carry the personality.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-5 text-sm">
+            <span className="font-normal text-paper">Regular 400</span>
+            <span className="font-medium text-paper">Medium 500</span>
+            <span className="font-semibold text-paper">Semibold 600</span>
+            <span className="font-bold text-paper">Bold 700</span>
           </div>
-          <div className="border-t border-ink-line pt-6">
-            <Caption>Data — IBM Plex Mono (the “printed on the ticket” voice)</Caption>
+        </div>
+
+        <div className="mt-10 border-t border-ink-line pt-10">
+          <SubLabel>Data — IBM Plex Mono (the “printed on the ticket” voice)</SubLabel>
+          <div className="space-y-2">
             <p className="font-mono text-lg tabular-nums text-paper">
-              ROW C · SEAT 07 &nbsp; 2026-07-02 19:30 &nbsp; <span className="text-brass">$27.00</span>
+              ROW C · SEAT 07 &nbsp; 2026-07-02 19:30 &nbsp;{' '}
+              <span className="text-brass">$27.00</span>
             </p>
-            <p className="mt-1 font-mono text-3xl font-semibold tabular-nums text-paper">04:58</p>
+            <p className="font-mono text-3xl font-semibold tabular-nums text-paper">04:58</p>
           </div>
         </div>
       </Section>
 
       {/* BUTTONS ---------------------------------------------------------- */}
       <Section eyebrow="Controls" title="Buttons">
-        <div className="space-y-5">
-          <div className="flex flex-wrap items-center gap-3">
-            <Button variant="primary">Hold 2 seats</Button>
-            <Button variant="secondary">Refresh map</Button>
-            <Button variant="ghost">Keep</Button>
-            <Button variant="danger">Release hold</Button>
+        <div className="space-y-8">
+          <div>
+            <SubLabel>Variants</SubLabel>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button variant="primary">Hold 2 seats</Button>
+              <Button variant="secondary">Refresh map</Button>
+              <Button variant="ghost">Keep</Button>
+              <Button variant="danger">Release hold</Button>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <Button size="sm">Small</Button>
-            <Button size="md">Medium</Button>
-            <Button size="lg">Large</Button>
-            <Button disabled>Disabled</Button>
-            <Button variant="secondary" disabled>
-              Holding…
+          <div>
+            <SubLabel>Sizes &amp; states</SubLabel>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button size="sm">Small</Button>
+              <Button size="md">Medium</Button>
+              <Button size="lg">Large</Button>
+              <Button disabled>Disabled</Button>
+              <Button variant="secondary" disabled>
+                Holding…
+              </Button>
+            </div>
+          </div>
+          <div>
+            <SubLabel>Full width</SubLabel>
+            <Button fullWidth size="lg">
+              Confirm
             </Button>
           </div>
-          <Button fullWidth size="lg">
-            Confirm
-          </Button>
         </div>
       </Section>
 
       {/* INPUTS ----------------------------------------------------------- */}
       <Section eyebrow="Controls" title="Inputs">
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
           <Field label="Email" htmlFor="demo-email" hint="We never share it.">
             <Input id="demo-email" type="email" placeholder="you@example.com" />
           </Field>
@@ -136,34 +153,47 @@ export default function StylePreviewPage() {
 
       {/* CARDS ------------------------------------------------------------ */}
       <Section eyebrow="Surfaces" title="Cards">
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-3">
           <Card>
             <h3 className="font-display text-lg font-semibold text-paper">Plain card</h3>
-            <p className="mt-1 text-sm text-paper-dim">Warm surface, hairline border.</p>
+            <p className="mt-2 text-sm text-paper-dim">
+              Raised surface, catch-light top edge, soft ambient depth.
+            </p>
           </Card>
-          <Card topRule>
-            <h3 className="font-display text-lg font-semibold text-paper">Top rule</h3>
-            <p className="mt-1 text-sm text-paper-dim">A brass edge for emphasis.</p>
+          <Card topRule className="shadow-glow">
+            <h3 className="font-display text-lg font-semibold text-paper">Emphasis</h3>
+            <p className="mt-2 text-sm text-paper-dim">
+              Brass top rule + glow — for the one panel that should lead.
+            </p>
           </Card>
           <Card interactive>
             <h3 className="font-display text-lg font-semibold text-paper">La Notte</h3>
             <p className="mt-1 font-mono text-sm text-paper-faint">2h 02m</p>
-            <div className="mt-2 flex gap-1.5">
+            <div className="mt-3 flex gap-1.5">
               <Badge tone="neutral">Drama</Badge>
               <Badge tone="neutral">Italian</Badge>
             </div>
           </Card>
         </div>
-        <p className="mt-3 text-sm text-paper-faint">
-          The interactive card is the movie-grid affordance — hover for the brass hairline.
-        </p>
+
+        {/* Internal padding hierarchy: a distinct header zone over the body. */}
+        <Card padded={false} className="mt-6 max-w-md overflow-hidden">
+          <div className="border-b border-ink-line px-6 py-5">
+            <Eyebrow>Now showing</Eyebrow>
+            <h3 className="mt-2 font-display text-xl font-semibold text-paper">
+              Sectioned card
+            </h3>
+          </div>
+          <div className="px-6 py-5">
+            <p className="text-sm text-paper-dim">
+              A heavier header padding over a quieter body — the rhythm used for detail panels.
+            </p>
+          </div>
+        </Card>
       </Section>
 
       {/* BADGES ----------------------------------------------------------- */}
-      <Section
-        eyebrow="Status"
-        title="Reservation badges — four distinct states"
-      >
+      <Section eyebrow="Status" title="Reservation badges — four distinct states">
         <div className="flex flex-wrap items-center gap-3">
           <Badge tone="confirmed">CONFIRMED</Badge>
           <Badge tone="pending">PENDING</Badge>
@@ -173,7 +203,7 @@ export default function StylePreviewPage() {
           <Badge tone="neutral">Sci-Fi</Badge>
           <Badge tone="brass">Now showing</Badge>
         </div>
-        <p className="mt-3 text-sm text-paper-faint">
+        <p className="mt-4 text-sm text-paper-faint">
           Green / amber / stone / red read apart at a glance; brass is reserved for the brand,
           never a status, so confirmed and pending never collide.
         </p>
@@ -189,32 +219,32 @@ export default function StylePreviewPage() {
           <SeatSpec kind="booked" n={7} label="Just lost" ring />
         </div>
 
-        <p className="mt-5 text-sm text-paper-dim">
-          A live row, as the picker renders it — the vermilion ring marks seats lost to a 409:
-        </p>
-        <div className="mt-3 inline-flex flex-col gap-2 rounded-lg border border-ink-line bg-ink-raised p-4">
-          <span className="text-center text-[0.625rem] uppercase tracking-eyebrow text-paper-faint">
-            ⎯⎯ Screen ⎯⎯
-          </span>
-          <div className="flex items-center gap-1.5">
-            <span className="w-4 text-right font-mono text-xs text-paper-faint">C</span>
-            <SeatChip kind="open" n={5} />
-            <SeatChip kind="selected" n={6} />
-            <SeatChip kind="held" n={7} />
-            <SeatChip kind="booked" n={8} ring />
-            <SeatChip kind="open" n={9} />
-            <SeatChip kind="open" n={10} />
+        <div className="mt-10">
+          <SubLabel>A live picker row — the vermilion ring marks seats lost to a 409</SubLabel>
+          <div className="inline-flex flex-col gap-2 rounded-lg border border-ink-line bg-ink-raised p-5 shadow-card">
+            <span className="text-center text-[0.625rem] uppercase tracking-eyebrow text-paper-faint">
+              ⎯⎯ Screen ⎯⎯
+            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="w-4 text-right font-mono text-xs text-paper-faint">C</span>
+              <SeatChip kind="open" n={5} />
+              <SeatChip kind="selected" n={6} />
+              <SeatChip kind="held" n={7} />
+              <SeatChip kind="booked" n={8} ring />
+              <SeatChip kind="open" n={9} />
+              <SeatChip kind="open" n={10} />
+            </div>
           </div>
+          <p className="mt-4 text-sm text-paper-faint">
+            Brass <span className="text-brass">selected</span> vs ocher{' '}
+            <span className="text-seat-held-text">held</span> (hatched) stay unmistakable; held and
+            booked are inert, available invites a click.
+          </p>
         </div>
-        <p className="mt-4 text-sm text-paper-faint">
-          Brass <span className="text-brass">selected</span> vs ocher{' '}
-          <span className="text-seat-held-text">held</span> (hatched) stay unmistakable; held and
-          booked are inert, available invites a click.
-        </p>
       </Section>
 
       {/* TABLE ------------------------------------------------------------ */}
-      <Section eyebrow="Data" title="Editorial table">
+      <Section eyebrow="Data" title="Editorial table — the admin surface">
         <Table>
           <THead>
             <tr>
@@ -244,13 +274,22 @@ export default function StylePreviewPage() {
               </TD>
               <TD numeric>$13.50</TD>
             </TR>
+            <TR>
+              <TD className="font-mono tabular-nums text-paper-faint">1044</TD>
+              <TD className="text-paper">Stalker</TD>
+              <TD>2026-07-04 18:00</TD>
+              <TD>
+                <Badge tone="cancelled">CANCELLED</Badge>
+              </TD>
+              <TD numeric>$40.00</TD>
+            </TR>
           </TBody>
         </Table>
       </Section>
 
       {/* SIGNATURE — TICKET STUB ----------------------------------------- */}
       <Section eyebrow="Signature" title="The ticket stub">
-        <div className="flex flex-wrap items-start gap-8">
+        <div className="flex flex-wrap items-start gap-10">
           <TicketStub
             admit={2}
             title="Dune: Part Two"
@@ -304,19 +343,19 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <section className="mb-14">
-      <div className="mb-5">
+    <section className="mb-20">
+      <header className="mb-8">
         <Eyebrow>{eyebrow}</Eyebrow>
-        <h2 className="mt-2 font-display text-2xl font-semibold text-paper">{title}</h2>
-      </div>
+        <h2 className="mt-3 font-display text-2xl font-semibold text-paper">{title}</h2>
+      </header>
       {children}
     </section>
   );
 }
 
-function Caption({ children }: { children: ReactNode }) {
+function SubLabel({ children }: { children: ReactNode }) {
   return (
-    <p className="mb-2 text-[0.6875rem] uppercase tracking-eyebrow text-paper-faint">{children}</p>
+    <p className="mb-3 text-[0.6875rem] uppercase tracking-eyebrow text-paper-faint">{children}</p>
   );
 }
 
@@ -334,13 +373,13 @@ function Swatch({
   dark?: boolean;
 }) {
   return (
-    <div className="overflow-hidden rounded-md border border-ink-line">
+    <div className="overflow-hidden rounded-md border border-ink-line shadow-card">
       <div className={cn('flex h-16 items-end p-2', className)}>
         <span className={cn('font-mono text-[0.625rem]', dark ? 'text-ink/70' : 'text-paper/70')}>
           {hex}
         </span>
       </div>
-      <div className="bg-ink-raised px-2 py-1.5">
+      <div className="bg-ink-raised px-3 py-2">
         <p className="font-mono text-xs text-paper">{name}</p>
         <p className="text-[0.625rem] text-paper-faint">{note}</p>
       </div>

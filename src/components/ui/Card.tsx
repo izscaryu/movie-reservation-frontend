@@ -24,7 +24,7 @@ export default function Card({
         'relative rounded-lg border border-ink-line bg-ink-raised shadow-card',
         topRule && 'border-t-2 border-t-brass',
         interactive && 'transition-colors hover:border-brass/50 hover:bg-ink-field',
-        padded && 'p-5',
+        padded && 'p-6',
         className,
       )}
       {...rest}

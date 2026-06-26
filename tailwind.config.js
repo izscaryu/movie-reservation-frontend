@@ -7,15 +7,15 @@ export default {
         // Surfaces — warm near-black (umber undertone), not slate.
         ink: {
           DEFAULT: '#100D0A', // page base
-          raised: '#1A1510', // cards / panels
-          field: '#211A13', // inputs / hover
-          line: '#2C2419', // hairline borders
+          raised: '#1C1712', // cards / panels — a touch lighter for separation
+          field: '#231C14', // inputs / hover
+          line: '#33291C', // hairline borders — more defined
         },
         // Text — warm off-white, like projector light on a screen.
         paper: {
           DEFAULT: '#F2EADB',
-          dim: '#B3A795',
-          faint: '#847A6A',
+          dim: '#C8BCA9', // nudged lighter — comfortably AA on the ink background
+          faint: '#9C9082', // captions / eyebrows — still AA, no longer murky
         },
         // Brand accent — muted brass, with a brighter amber for hover/glow.
         brass: {
@@ -56,8 +56,10 @@ export default {
         eyebrow: '0.18em',
       },
       boxShadow: {
-        card: '0 1px 2px rgba(0,0,0,0.4), 0 10px 30px -16px rgba(0,0,0,0.7)',
-        glow: '0 0 0 1px rgba(196,154,63,0.45), 0 0 28px -6px rgba(236,182,74,0.5)',
+        // Elevation on a dark UI comes from a catch-light top edge + a soft, deep
+        // ambient shadow, not a flat drop shadow (which disappears on near-black).
+        card: 'inset 0 1px 0 0 rgba(255,255,255,0.05), 0 2px 4px rgba(0,0,0,0.5), 0 18px 45px -22px rgba(0,0,0,0.95)',
+        glow: '0 0 0 1px rgba(196,154,63,0.5), 0 0 32px -4px rgba(236,182,74,0.4)',
       },
       keyframes: {
         'fade-in': { from: { opacity: '0' }, to: { opacity: '1' } },

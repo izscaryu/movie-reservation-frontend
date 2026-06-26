@@ -18,7 +18,7 @@ export function Table({ className, children, ...rest }: HTMLAttributes<HTMLTable
 
 export function THead({ className, children, ...rest }: HTMLAttributes<HTMLTableSectionElement>) {
   return (
-    <thead className={cn('bg-ink-raised', className)} {...rest}>
+    <thead className={cn('border-b border-ink-line bg-ink-raised', className)} {...rest}>
       {children}
     </thead>
   );
@@ -52,7 +52,7 @@ export function TH({
   return (
     <th
       className={cn(
-        'px-3 py-2.5 text-[0.6875rem] font-semibold uppercase tracking-eyebrow text-paper-faint',
+        'px-5 py-3.5 text-[0.6875rem] font-semibold uppercase tracking-eyebrow text-paper-faint',
         numeric ? 'text-right' : 'text-left',
         className,
       )}
@@ -72,7 +72,7 @@ export function TD({
   return (
     <td
       className={cn(
-        'px-3 py-3 align-middle text-paper-dim',
+        'px-5 py-4 align-middle text-paper-dim',
         numeric && 'text-right font-mono tabular-nums text-paper',
         className,
       )}
