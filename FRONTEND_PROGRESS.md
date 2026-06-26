@@ -210,3 +210,43 @@ automation; "live" here means the same contract+build+transform bar used in Slic
 Side effect of verification: seed reservations #105 (PENDING→cancelled) and #106
 (PENDING→CONFIRMED→cancelled) were created and cancelled on showtime 75; their seats were
 released, so no holds dangle.
+
+- Slice 7 — **Part A+B (done, pushed)**: admin shell + movie CRUD. (Slice 7 is staged:
+  A+B here, C = showtime create next, then D = reports + E = admin reservations in a later
+  session. The slice checkbox stays unticked until E.)
+  - `src/pages/admin/AdminLayout.tsx`: admin shell with a section sub-nav (Movies / Showtimes
+    / Reports / Reservations) + `<Outlet/>`. `App.tsx` replaces the old `admin/*` placeholder
+    route with a nested `admin` route under `RequireAdmin`: `index`→redirect to `movies`,
+    `movies`, `movies/new`, `movies/:movieId/edit`, plus `showtimes`/`reports`/`reservations`
+    rendering `AdminStub` (temporary "coming in Part X" — `showtimes` is replaced in Part C).
+    Unknown `/admin/*` redirects to `/admin/movies`. `placeholders.tsx` is now just the 404.
+  - `src/api/admin.ts`: `createMovie` / `updateMovie` / `deleteMovie` (via `authFetch`).
+  - `src/pages/admin/AdminMoviesPage.tsx`: paged list (reuses the public `GET /api/movies`,
+    which already excludes soft-deleted), `+ New movie`, per-row Edit link + Delete with an
+    inline "Delete this movie? Yes / Keep" confirm. Delete invalidates both `['admin-movies']`
+    and the public `['movies']` cache.
+  - `src/pages/admin/MovieFormPage.tsx`: shared create/edit form (title*, durationMinutes*,
+    genres as a comma input → `string[]`, optional posterUrl/description). Edit prefills from
+    `GET /api/movies/{id}` (one-shot guard so a refetch can't clobber edits) and handles the
+    404 (deleted) case. 400s surface the server's field-prefixed message inline.
+
+### Live finding — admin movie CRUD contract (verified live, throwaway movie #202)
+
+- `POST /api/admin/movies` → **201** with the full `MovieResponse`; **genres come back
+  sorted** (sent `["Test","Demo"]`, got `["Demo","Test"]`) — so trust the response, don't
+  re-sort client-side.
+- `PUT /api/admin/movies/{id}` → **200** with the updated `MovieResponse`.
+- Validation **400** uniform body, message is **field-prefixed and `; `-joined**:
+  `"durationMinutes: must not be null; title: must not be blank"` — shown inline as-is.
+- `DELETE /api/admin/movies/{id}` → **204** empty (the spec says 200 — trust live, 204).
+  After it, `GET /api/movies/{id}` → **404** and the row is gone from `GET /api/movies`
+  (174→… ; soft-delete via the V2 column). `deleteMovie` is `Promise<void>`.
+- Authz: a non-admin `POST /api/admin/movies` → **403** (backend enforces; `RequireAdmin`
+  covers the UI). The `GET /api/movies` page size is capped — `?size=200` → **400**, so the
+  admin list uses a modest size (12).
+
+**Verification scope (A+B):** live API contract above + `tsc`/`vite build` (109 modules) +
+`eslint` clean + Vite-transformed every new admin module (`AdminLayout`, `AdminMoviesPage`,
+`MovieFormPage`, `AdminStub`, `api/admin.ts`, `App.tsx`) through the running dev server (all
+200). The rendered admin DOM was **not** clicked — left for the user's in-browser pass before
+Parts D/E (same bar as prior slices).

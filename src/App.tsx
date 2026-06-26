@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
 import MoviesPage from './pages/MoviesPage';
 import MovieDetailPage from './pages/MovieDetailPage';
@@ -7,7 +7,11 @@ import HoldPage from './pages/HoldPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ReservationsPage from './pages/ReservationsPage';
-import { AdminPage, NotFoundPage } from './pages/placeholders';
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminMoviesPage from './pages/admin/AdminMoviesPage';
+import MovieFormPage from './pages/admin/MovieFormPage';
+import AdminStub from './pages/admin/AdminStub';
+import { NotFoundPage } from './pages/placeholders';
 import { RequireAdmin, RequireAuth } from './auth/guards';
 
 export default function App() {
@@ -34,13 +38,25 @@ export default function App() {
           }
         />
         <Route
-          path="admin/*"
+          path="admin"
           element={
             <RequireAdmin>
-              <AdminPage />
+              <AdminLayout />
             </RequireAdmin>
           }
-        />
+        >
+          <Route index element={<Navigate to="movies" replace />} />
+          <Route path="movies" element={<AdminMoviesPage />} />
+          <Route path="movies/new" element={<MovieFormPage />} />
+          <Route path="movies/:movieId/edit" element={<MovieFormPage />} />
+          <Route path="showtimes" element={<AdminStub title="Showtimes" part="Part C" />} />
+          <Route path="reports" element={<AdminStub title="Reports" part="Part D" />} />
+          <Route
+            path="reservations"
+            element={<AdminStub title="Admin reservations" part="Part E" />}
+          />
+          <Route path="*" element={<Navigate to="/admin/movies" replace />} />
+        </Route>
         <Route path="login" element={<LoginPage />} />
         <Route path="signup" element={<SignupPage />} />
         <Route path="*" element={<NotFoundPage />} />

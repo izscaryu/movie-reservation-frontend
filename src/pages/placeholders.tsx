@@ -1,18 +1,5 @@
-// Placeholder pages for the routing skeleton. Each is replaced by its real
-// implementation in a later slice (noted per page).
-
-function Placeholder({ title, slice }: { title: string; slice: string }) {
-  return (
-    <div className="rounded-lg border border-dashed border-slate-700 bg-slate-900/40 p-8 text-center">
-      <h1 className="text-xl font-semibold">{title}</h1>
-      <p className="mt-2 text-sm text-slate-400">Coming in {slice}.</p>
-    </div>
-  );
-}
-
-export function AdminPage() {
-  return <Placeholder title="Admin dashboard" slice="Slice 7" />;
-}
+// The catch-all 404 page. (The former Reservations/Admin placeholders have been
+// replaced by their real implementations in Slices 6–7.)
 
 export function NotFoundPage() {
   return (

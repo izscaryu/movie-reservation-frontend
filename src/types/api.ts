@@ -105,6 +105,19 @@ export interface ReservationRequest {
   showtimeSeatIds: number[];
 }
 
+/**
+ * Admin create/update body for a movie. `title` + `durationMinutes` are required;
+ * the rest are optional. The backend returns the full MovieResponse (genres come
+ * back sorted), so callers can use the response directly. Verified live.
+ */
+export interface MovieRequest {
+  title: string;
+  durationMinutes: number;
+  description?: string | null;
+  posterUrl?: string | null;
+  genres?: string[];
+}
+
 export type ReservationStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'EXPIRED';
 
 export interface ReservationResponse {
