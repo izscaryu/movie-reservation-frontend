@@ -429,3 +429,37 @@ user review of the direction at `/style` before any page-by-page rollout (1b+).*
   - **Verification:** `vite build` (122 modules, CSS 25.88 kB), `eslint` clean, `vitest` 11/11,
     dev-server `GET /style` 200 + font 200 `font/woff2` + `StylePreviewPage` transform 200. STOP
     gate still held — awaiting re-review of spacing/surfaces before 1b rollout.
+
+- Slice 8 — **Part 1 rollout 1b–1h (done, pushed)**: spacing/surfaces re-review passed; rolled
+  the foundation across every page, **one commit each, presentation only — no logic/API/state
+  changes**. Each page is a 1:1 restyle: existing branches (loading / error / empty, busy-button
+  text, confirm steps, pagination gating, 404/409 fallbacks) all preserved. Copy nudged to the
+  house voice where it helps the end user: nav **"My Tickets"**, brand **"The Orpheum"** (the page
+  H1 follows: "My tickets"). Commits:
+  - **1b shell** (`Layout`, `placeholders`): marquee header — Fraunces wordmark `◆ The Orpheum`,
+    small-caps letterspaced nav with brass active state, sticky blurred bar, Button auth actions
+    (Sign up is a brass CTA); 404 restyled.
+  - **1c browse** (`MoviesPage`, `MovieDetailPage`): `PageHeader` masthead, interactive `Card`s,
+    `Badge` genre pills, `Input`/`Button` filters, mono showtime times + brass prices.
+  - **1d auth** (`LoginPage`, `SignupPage`): centered `Card` with eyebrow header, `Field`/`Input`
+    + `Button`; success/error banners in palette.
+  - **1e my tickets** (`ReservationsPage`): tabs, `Card` rows, status `Badge` (`tone` = lowercased
+    status), danger cancel-confirm, empty-state CTA.
+  - **1f hold** (`HoldPage`): **the signature lands** — confirm + confirmed views render as the
+    `TicketStub`; low-time countdown turns vermilion; confirm still NOT gated on the countdown.
+  - **1g admin** (shell + 5 pages): brass sub-nav; `Card`/`Field`/`Select`/`Table` throughout;
+    added a `Textarea` primitive.
+  - **1h seat picker** (`SeatGrid`, `SeatPickerPage`, new `seatStyles.ts`): the careful pass —
+    seat hues retuned to tokens with semantics frozen (**selected = brass, HELD = ocher + shared
+    `HELD_HATCH`, BOOKED = oxblood, AVAILABLE clickable, just-lost ring = vermilion/offset**),
+    screen as a warm light spill, mono labels, legend matches the grid; the 409 re-pick flow and
+    refresh-on-conflict untouched.
+  - **Verification (rollout):** `vite build` clean (CSS settled ~22.5 kB once the slate/indigo
+    utilities dropped out), `eslint` clean, `vitest` 11/11 (auth/TZ/409-parse regressions green),
+    dev-server transforms 200 across the migrated modules (incl. `SeatGrid`/`SeatPickerPage`/
+    `HoldPage`). DOM not auto-clicked — no browser driver until Part 4.
+  - **Note:** the temporary `/style` preview is **kept for now** as living reference for Part 2
+    polish; it'll be removed (or gated) before the slice closes.
+
+**Part 1 (restyle) complete.** STOP gate: awaiting user in-browser review (esp. the seat picker +
+hold/ticket-stub) before Part 2 (polish states: loading/error/empty + responsive seat grid).
