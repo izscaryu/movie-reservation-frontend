@@ -6,20 +6,28 @@ import type { ReservationFilter } from '../api/reservations';
 import { ApiError } from '../lib/http';
 import { formatDateTime, formatPrice } from '../lib/format';
 import type { ReservationResponse, ReservationStatus } from '../types/api';
+import { cn } from '../lib/cn';
+import Badge from '../components/ui/Badge';
+import type { BadgeTone } from '../components/ui/Badge';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import PageHeader from '../components/ui/PageHeader';
+import { buttonClasses } from '../components/ui/buttonClasses';
 
 const PAGE_SIZE = 10;
-
-const STATUS_BADGE: Record<ReservationStatus, string> = {
-  CONFIRMED: 'border-emerald-800 bg-emerald-950/40 text-emerald-200',
-  PENDING: 'border-amber-800 bg-amber-950/40 text-amber-200',
-  CANCELLED: 'border-slate-700 bg-slate-800/60 text-slate-400',
-  EXPIRED: 'border-rose-900 bg-rose-950/40 text-rose-300',
-};
 
 // Cancel is offered only for these states. Verified live: DELETE on a PENDING or a
 // (future) CONFIRMED reservation returns 204; the server owns the transition. A
 // CANCELLED/EXPIRED row has nothing to cancel, and re-cancelling 409s.
 const CANCELLABLE: ReservationStatus[] = ['PENDING', 'CONFIRMED'];
+
+const tabClass = (active: boolean) =>
+  cn(
+    'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+    active
+      ? 'bg-brass text-ink'
+      : 'border border-ink-line text-paper-dim hover:bg-ink-raised hover:text-paper',
+  );
 
 export default function ReservationsPage() {
   const [filter, setFilter] = useState<ReservationFilter>('upcoming');
@@ -63,35 +71,33 @@ export default function ReservationsPage() {
     setActionError(null);
   }
 
-  const tabClass = (active: boolean) =>
-    `rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-      active ? 'bg-indigo-600 text-white' : 'border border-slate-700 text-slate-300 hover:bg-slate-800'
-    }`;
-
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">My reservations</h1>
-        <div className="flex gap-2">
-          <button onClick={() => switchFilter('upcoming')} className={tabClass(filter === 'upcoming')}>
-            Upcoming
-          </button>
-          <button onClick={() => switchFilter('past')} className={tabClass(filter === 'past')}>
-            Past
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="The Orpheum"
+        title="My tickets"
+        actions={
+          <div className="flex gap-2">
+            <button onClick={() => switchFilter('upcoming')} className={tabClass(filter === 'upcoming')}>
+              Upcoming
+            </button>
+            <button onClick={() => switchFilter('past')} className={tabClass(filter === 'past')}>
+              Past
+            </button>
+          </div>
+        }
+      />
 
       {actionError && (
-        <p className="mb-4 rounded-md border border-rose-800 bg-rose-950/50 px-4 py-3 text-sm text-rose-200">
+        <p className="mb-4 rounded-md border border-status-expired/40 bg-status-expired/10 px-4 py-3 text-sm text-status-expired">
           {actionError}
         </p>
       )}
 
-      {isPending && <p className="text-slate-400">Loading reservations…</p>}
+      {isPending && <p className="text-paper-dim">Loading reservations…</p>}
 
       {isError && (
-        <p className="rounded-md border border-red-900 bg-red-950/50 px-4 py-3 text-red-300">
+        <p className="rounded-md border border-status-expired/40 bg-status-expired/10 px-4 py-3 text-sm text-status-expired">
           Failed to load reservations: {error instanceof Error ? error.message : 'unknown error'}
         </p>
       )}
@@ -99,16 +105,13 @@ export default function ReservationsPage() {
       {data && (
         <>
           {data.content.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-700 bg-slate-900/40 p-8 text-center">
-              <p className="text-slate-400">
+            <div className="rounded-lg border border-dashed border-ink-line bg-ink-raised/60 p-10 text-center">
+              <p className="text-paper-dim">
                 No {filter} reservations.
-                {filter === 'upcoming' && ' Browse movies to book some seats.'}
+                {filter === 'upcoming' && " Browse what's showing to book some seats."}
               </p>
               {filter === 'upcoming' && (
-                <Link
-                  to="/"
-                  className="mt-4 inline-block rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium hover:bg-indigo-500"
-                >
+                <Link to="/" className={cn('mt-5 inline-flex', buttonClasses())}>
                   Browse movies
                 </Link>
               )}
@@ -135,27 +138,29 @@ export default function ReservationsPage() {
           )}
 
           {/* Server-driven pagination — never compute totals client-side (landmine #6). */}
-          <div className="mt-6 flex items-center justify-between text-sm text-slate-400">
+          <div className="mt-8 flex items-center justify-between text-sm text-paper-faint">
             <span>
               Page {data.page + 1} of {Math.max(data.totalPages, 1)} · {data.totalElements} reservation
               {data.totalElements === 1 ? '' : 's'}
               {isFetching && ' · updating…'}
             </span>
             <div className="flex gap-2">
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={data.first}
-                className="rounded-md border border-slate-700 px-3 py-1.5 disabled:opacity-40 enabled:hover:bg-slate-800"
               >
                 Previous
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => setPage((p) => p + 1)}
                 disabled={data.last}
-                className="rounded-md border border-slate-700 px-3 py-1.5 disabled:opacity-40 enabled:hover:bg-slate-800"
               >
                 Next
-              </button>
+              </Button>
             </div>
           </div>
         </>
@@ -184,52 +189,40 @@ function ReservationRow({
   onDismissCancel,
 }: RowProps) {
   return (
-    <li className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-slate-800 bg-slate-900/50 p-4">
-      <div className="min-w-0">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold">{r.movieTitle}</h2>
-          <span
-            className={`rounded-full border px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[r.status]}`}
-          >
-            {r.status}
-          </span>
+    <li>
+      <Card className="flex flex-wrap items-center justify-between gap-4">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2.5">
+            <h2 className="font-display text-lg font-semibold text-paper">{r.movieTitle}</h2>
+            <Badge tone={r.status.toLowerCase() as BadgeTone}>{r.status}</Badge>
+          </div>
+          <p className="mt-1 text-sm text-paper-dim">{formatDateTime(r.startTime)}</p>
+          <p className="mt-1 text-sm text-paper-dim">
+            Seats <span className="font-mono text-paper">{r.seats.join(', ')}</span> ·{' '}
+            <span className="font-mono text-brass">{formatPrice(r.totalPrice)}</span>
+          </p>
         </div>
-        <p className="mt-1 text-sm text-slate-400">{formatDateTime(r.startTime)}</p>
-        <p className="mt-1 text-sm text-slate-300">
-          Seats {r.seats.join(', ')} · {formatPrice(r.totalPrice)}
-        </p>
-      </div>
 
-      {cancellable && (
-        <div className="flex shrink-0 items-center gap-2">
-          {confirming ? (
-            <>
-              <span className="text-sm text-slate-400">Cancel this reservation?</span>
-              <button
-                onClick={onConfirmCancel}
-                disabled={busy}
-                className="rounded-md bg-rose-600 px-3 py-1.5 text-sm font-medium hover:bg-rose-500 disabled:opacity-50"
-              >
-                {busy ? 'Cancelling…' : 'Yes, cancel'}
-              </button>
-              <button
-                onClick={onDismissCancel}
-                disabled={busy}
-                className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800 disabled:opacity-50"
-              >
-                Keep
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={onAskCancel}
-              className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:border-rose-700 hover:bg-rose-950/40 hover:text-rose-200"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      )}
+        {cancellable && (
+          <div className="flex shrink-0 items-center gap-2">
+            {confirming ? (
+              <>
+                <span className="text-sm text-paper-dim">Cancel this reservation?</span>
+                <Button variant="danger" size="sm" onClick={onConfirmCancel} disabled={busy}>
+                  {busy ? 'Cancelling…' : 'Yes, cancel'}
+                </Button>
+                <Button variant="secondary" size="sm" onClick={onDismissCancel} disabled={busy}>
+                  Keep
+                </Button>
+              </>
+            ) : (
+              <Button variant="secondary" size="sm" onClick={onAskCancel}>
+                Cancel
+              </Button>
+            )}
+          </div>
+        )}
+      </Card>
     </li>
   );
 }
