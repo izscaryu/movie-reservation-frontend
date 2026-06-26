@@ -288,3 +288,34 @@ Side effect: this verification left a real showtime **#146** (movie 113, Room 1,
 clean + Vite-transformed `AdminShowtimesPage` / `api/admin.ts` / `api/movies.ts` / `App.tsx`
 (all 200). DOM not clicked — the user will verify A+B and C in-browser (esp. the time
 round-trip) before D+E.
+
+> A+B+C verified in-browser by the user and confirmed good before D+E.
+
+- Slice 7 — **Part D (done, pushed)**: the 4 reports (read-only).
+  - `src/pages/admin/AdminReportsPage.tsx` (replaces the Reports stub): a shared `from`/`to`
+    date-range control (Apply / All-time; empty = all-time) drives three reports — a **revenue**
+    summary card (totalRevenue + confirmedReservations), a **revenue-by-movie** table (the plain
+    array, already sorted desc by the backend), and a **popular-movies** table that is **paged**
+    (renders the server's `page`/`totalPages`/`totalElements`/`first`/`last`, never computed
+    client-side; size 10). A separate **occupancy** lookup (independent of the range) takes a
+    showtime id → a booked / total / occupancy% card; a missing id (404) shows "No showtime with
+    id N", other errors surface the message. Showtime/occupancy times go through `formatDateTime`
+    (UTC), prices through `formatPrice`.
+  - `src/api/admin.ts`: `getRevenueReport` / `getRevenueByMovie` / `getPopularMovies` /
+    `getOccupancy` (+ `DateRangeQuery` / `PopularMoviesQuery`). `src/types/api.ts`: `RevenueReport`,
+    `RevenueByMovie`, `PopularMovie`, `OccupancyReport`.
+
+### Re-confirmed live (Part D/E grounding) — report + admin-reservation contracts unchanged
+
+Re-verified against live Swagger + responses (not re-derived): `revenue` →
+`{from,to,totalRevenue,confirmedReservations}` (from/to optional, `null` = all-time); `revenue/by-movie`
+→ `[{movieId,movieTitle,revenue}]` (array, desc); `popular-movies` → paged `{content:[{movieId,
+movieTitle,ticketsSold}],…}` (from/to, page, size def 10); `occupancy` →
+`{showtimeId,movieTitle,startTime,totalSeats,bookedSeats,occupancyRate}` (showtimeId required, bad id
+→ **404**). Report **dates are `yyyy-MM-dd`** and **all params optional** (no-range → 200, all-time).
+(Revenue totals now read 600.00 / 30 vs last session's 620 / 31 — expected, since Slice 6/7
+verification cancelled a couple of confirmed reservations.)
+
+**Verification scope (D):** live contract re-confirmation above (incl. empty-range = 200) + `tsc`/
+`vite build` + `eslint` clean + Vite-transformed `AdminReportsPage` / `api/admin.ts` / `types/api.ts`
+/ `App.tsx` (all 200). DOM not auto-clicked (no browser driver — same bar as prior slices).

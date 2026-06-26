@@ -149,3 +149,54 @@ export interface ReservationResponse {
   /** Seat labels (e.g. "A5"), not ids. */
   seats: string[];
 }
+
+// ---- Admin reports ----
+
+/** GET /api/admin/reports/revenue. from/to echo the (optional) range; null = all-time. */
+export interface RevenueReport {
+  from: string | null;
+  to: string | null;
+  totalRevenue: number;
+  confirmedReservations: number;
+}
+
+/** A row of GET /api/admin/reports/revenue/by-movie (a plain array, sorted by revenue desc). */
+export interface RevenueByMovie {
+  movieId: number;
+  movieTitle: string;
+  revenue: number;
+}
+
+/** A row of the paged GET /api/admin/reports/popular-movies. */
+export interface PopularMovie {
+  movieId: number;
+  movieTitle: string;
+  ticketsSold: number;
+}
+
+/** GET /api/admin/reports/occupancy?showtimeId=. 404 if the showtime doesn't exist. */
+export interface OccupancyReport {
+  showtimeId: number;
+  movieTitle: string;
+  startTime: string;
+  totalSeats: number;
+  bookedSeats: number;
+  /** Percentage, e.g. 5.00 = 5%. */
+  occupancyRate: number;
+}
+
+/** A row of the paged GET /api/admin/reservations — richer than ReservationResponse
+ *  (carries the owning user and uses `showtimeStartTime`, not `startTime`). No `seats`. */
+export interface AdminReservationResponse {
+  id: number;
+  userId: number;
+  userEmail: string;
+  userName: string;
+  showtimeId: number;
+  movieTitle: string;
+  showtimeStartTime: string;
+  status: ReservationStatus;
+  createdAt: string;
+  expiresAt: string | null;
+  totalPrice: number;
+}
