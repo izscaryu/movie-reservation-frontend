@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../lib/http';
+import Alert from '../components/ui/Alert';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Eyebrow from '../components/ui/Eyebrow';
@@ -52,9 +53,9 @@ export default function LoginPage() {
         </div>
         <div className="px-6 py-6">
           {justSignedUp && (
-            <p className="mb-4 rounded-md border border-status-confirmed/40 bg-status-confirmed/10 px-3 py-2 text-sm text-status-confirmed">
+            <Alert tone="success" className="mb-4">
               Account created — log in to continue.
-            </p>
+            </Alert>
           )}
           <form onSubmit={onSubmit} className="space-y-4">
             <Field label="Email" htmlFor="email">
@@ -78,11 +79,7 @@ export default function LoginPage() {
               />
             </Field>
 
-            {error && (
-              <p className="rounded-md border border-status-expired/40 bg-status-expired/10 px-3 py-2 text-sm text-status-expired">
-                {error}
-              </p>
-            )}
+            {error && <Alert>{error}</Alert>}
 
             <Button type="submit" fullWidth disabled={submitting}>
               {submitting ? 'Logging in…' : 'Log in'}

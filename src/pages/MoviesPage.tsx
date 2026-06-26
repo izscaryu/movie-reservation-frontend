@@ -3,11 +3,14 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { getMovies } from '../api/movies';
 import { formatDuration } from '../lib/format';
+import Alert from '../components/ui/Alert';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import EmptyState from '../components/ui/EmptyState';
 import { Input } from '../components/ui/Input';
 import PageHeader from '../components/ui/PageHeader';
+import Skeleton from '../components/ui/Skeleton';
 
 const PAGE_SIZE = 12;
 
@@ -59,18 +62,18 @@ export default function MoviesPage() {
         }
       />
 
-      {isPending && <p className="text-paper-dim">Loading movies…</p>}
+      {isPending && <MoviesSkeleton />}
 
       {isError && (
-        <p className="rounded-md border border-status-expired/40 bg-status-expired/10 px-4 py-3 text-sm text-status-expired">
-          Failed to load movies: {error instanceof Error ? error.message : 'unknown error'}
-        </p>
+        <Alert>Failed to load movies: {error instanceof Error ? error.message : 'unknown error'}</Alert>
       )}
 
       {data && (
         <>
           {data.content.length === 0 ? (
-            <p className="text-paper-dim">No movies found{genre ? ` for genre “${genre}”` : ''}.</p>
+            <EmptyState title="No films found">
+              {genre ? `Nothing matches “${genre}”.` : "Check back soon for what's showing."}
+            </EmptyState>
           ) : (
             <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {data.content.map((movie) => (
@@ -132,5 +135,26 @@ export default function MoviesPage() {
         </>
       )}
     </div>
+  );
+}
+
+function MoviesSkeleton() {
+  return (
+    <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <li key={i}>
+          <Card>
+            <Skeleton className="h-6 w-2/3" />
+            <Skeleton className="mt-3 h-4 w-20" />
+            <div className="mt-3 flex gap-1.5">
+              <Skeleton className="h-5 w-16 rounded-full" />
+              <Skeleton className="h-5 w-14 rounded-full" />
+            </div>
+            <Skeleton className="mt-4 h-4 w-full" />
+            <Skeleton className="mt-2 h-4 w-5/6" />
+          </Card>
+        </li>
+      ))}
+    </ul>
   );
 }

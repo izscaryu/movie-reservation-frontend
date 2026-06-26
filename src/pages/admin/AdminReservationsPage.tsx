@@ -5,9 +5,11 @@ import type { AdminReservationsQuery } from '../../api/admin';
 import { formatDateTime, formatPrice } from '../../lib/format';
 import type { BadgeTone } from '../../components/ui/Badge';
 import type { ReservationStatus } from '../../types/api';
+import Alert from '../../components/ui/Alert';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import { Field, Input, Select } from '../../components/ui/Input';
+import Loading from '../../components/ui/Loading';
 import { Table, TBody, TD, TH, THead, TR } from '../../components/ui/Table';
 
 const PAGE_SIZE = 20;
@@ -108,12 +110,12 @@ export default function AdminReservationsPage() {
         </Button>
       </form>
 
-      {isPending && <p className="text-paper-dim">Loading reservations…</p>}
+      {isPending && <Loading>Loading reservations…</Loading>}
 
       {isError && (
-        <p className="rounded-md border border-status-expired/40 bg-status-expired/10 px-4 py-3 text-sm text-status-expired">
+        <Alert>
           Failed to load reservations: {error instanceof Error ? error.message : 'unknown error'}
-        </p>
+        </Alert>
       )}
 
       {data && (

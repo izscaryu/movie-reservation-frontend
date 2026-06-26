@@ -5,12 +5,17 @@
 // Vertical rhythm used throughout: tight WITHIN a group (gap-3 / space-y-2),
 // generous BETWEEN groups (section mb-20, subgroup mt-10 + hairline, header mb-8).
 import type { ReactNode } from 'react';
+import Alert from '../components/ui/Alert';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import EmptyState from '../components/ui/EmptyState';
 import Eyebrow from '../components/ui/Eyebrow';
 import { Field, Input, Select } from '../components/ui/Input';
+import Loading from '../components/ui/Loading';
 import PageHeader from '../components/ui/PageHeader';
+import Skeleton from '../components/ui/Skeleton';
+import Spinner from '../components/ui/Spinner';
 import { Table, TBody, TD, TH, THead, TR } from '../components/ui/Table';
 import TicketStub from '../components/ui/TicketStub';
 import { cn } from '../lib/cn';
@@ -190,6 +195,39 @@ export default function StylePreviewPage() {
             </p>
           </div>
         </Card>
+      </Section>
+
+      {/* STATES ----------------------------------------------------------- */}
+      <Section eyebrow="States" title="Loading, error & empty">
+        <div className="space-y-8">
+          <div>
+            <SubLabel>Alerts — direction, not mood</SubLabel>
+            <div className="max-w-xl space-y-3">
+              <Alert tone="error">A3, A4 were just taken. Pick again.</Alert>
+              <Alert tone="success">Account created — log in to continue.</Alert>
+              <Alert tone="warning">Your hold timer has run out. You can still try to confirm.</Alert>
+              <Alert tone="info">Holds last about 10 minutes and release automatically.</Alert>
+            </div>
+          </div>
+          <div>
+            <SubLabel>Loading</SubLabel>
+            <div className="flex flex-wrap items-center gap-8">
+              <Loading>Loading movies…</Loading>
+              <Spinner />
+            </div>
+            <div className="mt-4 grid max-w-sm grid-cols-3 gap-2">
+              <Skeleton className="h-4" />
+              <Skeleton className="h-4" />
+              <Skeleton className="h-4 w-2/3" />
+            </div>
+          </div>
+          <div>
+            <SubLabel>Empty — an invitation to act</SubLabel>
+            <EmptyState title="No films found" action={<Button>Browse movies</Button>}>
+              Check back soon for what's showing.
+            </EmptyState>
+          </div>
+        </div>
       </Section>
 
       {/* BADGES ----------------------------------------------------------- */}

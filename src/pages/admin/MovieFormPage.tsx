@@ -6,8 +6,10 @@ import { createMovie, updateMovie } from '../../api/admin';
 import { ApiError } from '../../lib/http';
 import type { MovieRequest } from '../../types/api';
 import { cn } from '../../lib/cn';
+import Alert from '../../components/ui/Alert';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
+import Loading from '../../components/ui/Loading';
 import { Field, Input, Textarea } from '../../components/ui/Input';
 import { buttonClasses } from '../../components/ui/buttonClasses';
 
@@ -77,7 +79,7 @@ export default function MovieFormPage() {
   }
 
   if (editing && movieQuery.isPending) {
-    return <p className="text-paper-dim">Loading movie…</p>;
+    return <Loading>Loading movie…</Loading>;
   }
   if (editing && movieQuery.isError) {
     const notFound = movieQuery.error instanceof ApiError && movieQuery.error.status === 404;
@@ -151,11 +153,7 @@ export default function MovieFormPage() {
           />
         </Field>
 
-        {error && (
-          <p className="rounded-md border border-status-expired/40 bg-status-expired/10 px-3 py-2 text-sm text-status-expired">
-            {error}
-          </p>
-        )}
+        {error && <Alert>{error}</Alert>}
 
         <div className="flex gap-3">
           <Button type="submit" disabled={mutation.isPending}>

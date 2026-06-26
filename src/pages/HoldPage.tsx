@@ -7,6 +7,7 @@ import { ApiError } from '../lib/http';
 import { formatDateTime, formatPrice } from '../lib/format';
 import type { ReservationResponse } from '../types/api';
 import { cn } from '../lib/cn';
+import Alert from '../components/ui/Alert';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -153,10 +154,10 @@ export default function HoldPage() {
         footer={
           <div>
             {countdown.expired ? (
-              <p className="rounded-md border border-status-pending/40 bg-status-pending/10 px-3 py-2 text-center text-sm text-status-pending">
+              <Alert tone="warning" className="text-center">
                 Your hold timer has run out. You can still try to confirm — we'll check with the
                 server.
-              </p>
+              </Alert>
             ) : (
               <div className="rounded-md border border-ink-line bg-ink p-3 text-center">
                 <p className="text-[0.625rem] uppercase tracking-eyebrow text-paper-faint">
@@ -174,9 +175,7 @@ export default function HoldPage() {
             )}
 
             {outcome.kind === 'error' && (
-              <p className="mt-4 rounded-md border border-status-expired/40 bg-status-expired/10 px-3 py-2 text-sm text-status-expired">
-                {outcome.message}
-              </p>
+              <Alert className="mt-4">{outcome.message}</Alert>
             )}
 
             <div className="mt-4 flex gap-3">

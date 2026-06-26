@@ -6,6 +6,7 @@ import { createShowtime } from '../../api/admin';
 import { ApiError } from '../../lib/http';
 import { formatDateTime, formatPrice } from '../../lib/format';
 import type { ShowtimeRequest, ShowtimeResponse } from '../../types/api';
+import Alert from '../../components/ui/Alert';
 import Button from '../../components/ui/Button';
 import { Field, Input, Select } from '../../components/ui/Input';
 
@@ -50,8 +51,8 @@ export default function AdminShowtimesPage() {
       <h2 className="mb-5 font-display text-xl font-semibold text-paper">Schedule a showtime</h2>
 
       {created && (
-        <div className="mb-5 rounded-md border border-status-confirmed/40 bg-status-confirmed/10 p-4 text-sm">
-          <p className="font-medium text-status-confirmed">Showtime created 🎬</p>
+        <Alert tone="success" className="mb-5">
+          <p className="font-medium">Showtime created 🎬</p>
           <p className="mt-1 text-paper-dim">
             {created.movieTitle} · {created.roomName} · {formatDateTime(created.startTime)} →{' '}
             {formatDateTime(created.endTime)} · {formatPrice(created.price)}
@@ -62,14 +63,14 @@ export default function AdminShowtimesPage() {
           >
             View on the movie page →
           </Link>
-        </div>
+        </Alert>
       )}
 
       {moviesQuery.isError && (
-        <p className="mb-5 rounded-md border border-status-expired/40 bg-status-expired/10 px-4 py-3 text-sm text-status-expired">
+        <Alert className="mb-5">
           Couldn't load the movie list:{' '}
           {moviesQuery.error instanceof Error ? moviesQuery.error.message : 'unknown'}
-        </p>
+        </Alert>
       )}
 
       <form onSubmit={onSubmit} className="space-y-4">
@@ -133,11 +134,7 @@ export default function AdminShowtimesPage() {
           />
         </Field>
 
-        {error && (
-          <p className="rounded-md border border-status-expired/40 bg-status-expired/10 px-3 py-2 text-sm text-status-expired">
-            {error}
-          </p>
-        )}
+        {error && <Alert>{error}</Alert>}
 
         <Button type="submit" disabled={mutation.isPending}>
           {mutation.isPending ? 'Creating…' : 'Create showtime'}

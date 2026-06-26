@@ -5,11 +5,13 @@ import { getMovie, getShowtimes } from '../api/movies';
 import { ApiError } from '../lib/http';
 import { formatDate, formatDuration, formatPrice, formatTime } from '../lib/format';
 import type { ShowtimeResponse } from '../types/api';
+import Alert from '../components/ui/Alert';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Eyebrow from '../components/ui/Eyebrow';
 import { Input } from '../components/ui/Input';
+import Loading from '../components/ui/Loading';
 
 const backLink = 'text-sm font-medium text-brass transition-colors hover:text-brass-bright';
 
@@ -39,7 +41,7 @@ export default function MovieDetailPage() {
   }
 
   if (movieQuery.isPending) {
-    return <p className="text-paper-dim">Loading movie…</p>;
+    return <Loading>Loading movie…</Loading>;
   }
 
   if (movieQuery.isError) {
@@ -49,11 +51,11 @@ export default function MovieDetailPage() {
         <Link to="/" className={backLink}>
           ← Back to movies
         </Link>
-        <p className="mt-4 rounded-md border border-status-expired/40 bg-status-expired/10 px-4 py-3 text-sm text-status-expired">
+        <Alert className="mt-4">
           {notFound
             ? 'That movie does not exist.'
             : `Failed to load movie: ${movieQuery.error instanceof Error ? movieQuery.error.message : 'unknown error'}`}
-        </p>
+        </Alert>
       </div>
     );
   }
@@ -117,13 +119,13 @@ export default function MovieDetailPage() {
           </div>
         </div>
 
-        {showtimesQuery.isPending && <p className="text-paper-dim">Loading showtimes…</p>}
+        {showtimesQuery.isPending && <Loading>Loading showtimes…</Loading>}
 
         {showtimesQuery.isError && (
-          <p className="rounded-md border border-status-expired/40 bg-status-expired/10 px-4 py-3 text-sm text-status-expired">
+          <Alert>
             Failed to load showtimes:{' '}
             {showtimesQuery.error instanceof Error ? showtimesQuery.error.message : 'unknown error'}
-          </p>
+          </Alert>
         )}
 
         {showtimesQuery.data && <ShowtimeList showtimes={showtimesQuery.data} date={date} />}

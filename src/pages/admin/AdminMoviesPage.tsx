@@ -7,8 +7,11 @@ import { ApiError } from '../../lib/http';
 import { formatDuration } from '../../lib/format';
 import type { MovieResponse } from '../../types/api';
 import { cn } from '../../lib/cn';
+import Alert from '../../components/ui/Alert';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
+import EmptyState from '../../components/ui/EmptyState';
+import Loading from '../../components/ui/Loading';
 import { buttonClasses } from '../../components/ui/buttonClasses';
 
 // The list reuses the public paged GET /api/movies (which already excludes
@@ -51,24 +54,27 @@ export default function AdminMoviesPage() {
         </Link>
       </div>
 
-      {actionError && (
-        <p className="mb-4 rounded-md border border-status-expired/40 bg-status-expired/10 px-4 py-3 text-sm text-status-expired">
-          {actionError}
-        </p>
-      )}
+      {actionError && <Alert className="mb-4">{actionError}</Alert>}
 
-      {isPending && <p className="text-paper-dim">Loading movies…</p>}
+      {isPending && <Loading>Loading movies…</Loading>}
 
       {isError && (
-        <p className="rounded-md border border-status-expired/40 bg-status-expired/10 px-4 py-3 text-sm text-status-expired">
-          Failed to load movies: {error instanceof Error ? error.message : 'unknown error'}
-        </p>
+        <Alert>Failed to load movies: {error instanceof Error ? error.message : 'unknown error'}</Alert>
       )}
 
       {data && (
         <>
           {data.content.length === 0 ? (
-            <p className="text-paper-dim">No movies yet. Create one to get started.</p>
+            <EmptyState
+              title="No movies yet"
+              action={
+                <Link to="/admin/movies/new" className={buttonClasses()}>
+                  + New movie
+                </Link>
+              }
+            >
+              Create one to get started.
+            </EmptyState>
           ) : (
             <ul className="space-y-2.5">
               {data.content.map((m) => (

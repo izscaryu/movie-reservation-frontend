@@ -10,8 +10,10 @@ import { ApiError } from '../lib/http';
 import { parseUnavailableSeatLabels } from '../lib/seatConflict';
 import { cn } from '../lib/cn';
 import type { SeatMapEntry } from '../types/api';
+import Alert from '../components/ui/Alert';
 import Button from '../components/ui/Button';
 import Eyebrow from '../components/ui/Eyebrow';
+import Skeleton from '../components/ui/Skeleton';
 
 export default function SeatPickerPage() {
   const { showtimeId } = useParams<{ showtimeId: string }>();
@@ -97,12 +99,10 @@ export default function SeatPickerPage() {
   }
 
   if (!Number.isFinite(id)) return <p className="text-paper-dim">Invalid showtime id.</p>;
-  if (isPending) return <p className="text-paper-dim">Loading seat map…</p>;
+  if (isPending) return <SeatMapSkeleton />;
   if (isError) {
     return (
-      <p className="rounded-md border border-status-expired/40 bg-status-expired/10 px-4 py-3 text-sm text-status-expired">
-        Failed to load seat map: {error instanceof Error ? error.message : 'unknown error'}
-      </p>
+      <Alert>Failed to load seat map: {error instanceof Error ? error.message : 'unknown error'}</Alert>
     );
   }
 
@@ -136,6 +136,8 @@ export default function SeatPickerPage() {
       </div>
 
       {errorMessage && (
+        // The 409 "pick again" message uses the lost-seat vermilion, matching the
+        // ring on the grid — deliberately distinct from a generic red error.
         <p className="mx-auto mt-6 max-w-md rounded-md border border-alert/50 bg-alert/10 px-4 py-3 text-center text-sm text-alert">
           {errorMessage}
         </p>
@@ -166,6 +168,23 @@ export default function SeatPickerPage() {
               ? `Hold ${selected.size || ''} seat${selected.size === 1 ? '' : 's'}`.trim()
               : 'Log in to reserve'}
         </Button>
+      </div>
+    </div>
+  );
+}
+
+function SeatMapSkeleton() {
+  return (
+    <div className="mx-auto w-fit" aria-hidden>
+      <Skeleton className="mx-auto mb-8 h-1 w-3/4" />
+      <div className="space-y-1 sm:space-y-1.5">
+        {Array.from({ length: 6 }).map((_, r) => (
+          <div key={r} className="flex gap-1 sm:gap-1.5">
+            {Array.from({ length: 10 }).map((_, c) => (
+              <Skeleton key={c} className="h-7 w-7 sm:h-8 sm:w-8" />
+            ))}
+          </div>
+        ))}
       </div>
     </div>
   );

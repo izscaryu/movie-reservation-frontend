@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../lib/http';
+import Alert from '../components/ui/Alert';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Eyebrow from '../components/ui/Eyebrow';
@@ -81,11 +82,7 @@ export default function SignupPage() {
               />
             </Field>
 
-            {error && (
-              <p className="rounded-md border border-status-expired/40 bg-status-expired/10 px-3 py-2 text-sm text-status-expired">
-                {error}
-              </p>
-            )}
+            {error && <Alert>{error}</Alert>}
 
             <Button type="submit" fullWidth disabled={submitting}>
               {submitting ? 'Creating account…' : 'Sign up'}

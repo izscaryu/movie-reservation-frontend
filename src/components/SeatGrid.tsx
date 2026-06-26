@@ -13,7 +13,7 @@ interface SeatGridProps {
 
 function seatClasses(seat: SeatMapEntry, isSelected: boolean, isConflict: boolean): string {
   const base =
-    'flex h-8 w-8 items-center justify-center rounded font-mono text-xs font-medium transition-colors';
+    'flex h-7 w-7 items-center justify-center rounded font-mono text-xs font-medium transition-colors sm:h-8 sm:w-8';
   // The just-lost ring must punch — vermilion, offset against the page.
   const ring = isConflict ? ' ring-2 ring-alert ring-offset-2 ring-offset-ink' : '';
 
@@ -57,11 +57,13 @@ export default function SeatGrid({ seats, selected, conflictLabels, onToggle }: 
           <div className="mx-auto h-1 w-3/4 rounded-full bg-gradient-to-r from-transparent via-brass/60 to-transparent" />
           <p className="mt-2 text-[0.625rem] uppercase tracking-eyebrow text-paper-faint">Screen</p>
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-1 sm:space-y-1.5">
           {rows.map((row) => (
-            <div key={row.label} className="flex items-center gap-1.5">
-              <span className="w-5 text-right font-mono text-xs text-paper-faint">{row.label}</span>
-              <div className="flex gap-1.5">
+            <div key={row.label} className="flex items-center gap-1 sm:gap-1.5">
+              <span className="w-4 text-right font-mono text-xs text-paper-faint sm:w-5">
+                {row.label}
+              </span>
+              <div className="flex gap-1 sm:gap-1.5">
                 {row.seats.map((seat) => {
                   const isSelected = selected.has(seat.showtimeSeatId);
                   const isConflict = conflictLabels.has(seat.label);

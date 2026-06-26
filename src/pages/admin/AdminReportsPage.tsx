@@ -8,9 +8,11 @@ import {
 } from '../../api/admin';
 import { ApiError } from '../../lib/http';
 import { formatDateTime, formatPrice } from '../../lib/format';
+import Alert from '../../components/ui/Alert';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import { Field, Input } from '../../components/ui/Input';
+import Loading from '../../components/ui/Loading';
 import { Table, TBody, TD, TH, THead, TR } from '../../components/ui/Table';
 
 const POPULAR_SIZE = 10;
@@ -208,14 +210,12 @@ function OccupancyLookup() {
 
       {showtimeId !== null && (
         <div className="mt-5">
-          {query.isPending && <p className="text-paper-dim">Loading occupancy…</p>}
+          {query.isPending && <Loading>Loading occupancy…</Loading>}
           {query.isError &&
             (notFound ? (
               <p className="text-paper-dim">No showtime with id {showtimeId}.</p>
             ) : (
-              <p className="rounded-md border border-status-expired/40 bg-status-expired/10 px-4 py-3 text-sm text-status-expired">
-                {query.error instanceof Error ? query.error.message : 'Lookup failed.'}
-              </p>
+              <Alert>{query.error instanceof Error ? query.error.message : 'Lookup failed.'}</Alert>
             ))}
           {query.data && (
             <Card>
@@ -305,12 +305,12 @@ function QueryState({
   label: string;
   children: React.ReactNode;
 }) {
-  if (query.isPending) return <p className="text-paper-dim">Loading {label}…</p>;
+  if (query.isPending) return <Loading>Loading {label}…</Loading>;
   if (query.isError) {
     return (
-      <p className="rounded-md border border-status-expired/40 bg-status-expired/10 px-4 py-3 text-sm text-status-expired">
+      <Alert>
         Failed to load {label}: {query.error instanceof Error ? query.error.message : 'unknown error'}
-      </p>
+      </Alert>
     );
   }
   return <>{children}</>;

@@ -7,10 +7,13 @@ import { ApiError } from '../lib/http';
 import { formatDateTime, formatPrice } from '../lib/format';
 import type { ReservationResponse, ReservationStatus } from '../types/api';
 import { cn } from '../lib/cn';
+import Alert from '../components/ui/Alert';
 import Badge from '../components/ui/Badge';
 import type { BadgeTone } from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import EmptyState from '../components/ui/EmptyState';
+import Loading from '../components/ui/Loading';
 import PageHeader from '../components/ui/PageHeader';
 import { buttonClasses } from '../components/ui/buttonClasses';
 
@@ -89,33 +92,34 @@ export default function ReservationsPage() {
       />
 
       {actionError && (
-        <p className="mb-4 rounded-md border border-status-expired/40 bg-status-expired/10 px-4 py-3 text-sm text-status-expired">
-          {actionError}
-        </p>
+        <Alert className="mb-4">{actionError}</Alert>
       )}
 
-      {isPending && <p className="text-paper-dim">Loading reservations…</p>}
+      {isPending && <Loading>Loading reservations…</Loading>}
 
       {isError && (
-        <p className="rounded-md border border-status-expired/40 bg-status-expired/10 px-4 py-3 text-sm text-status-expired">
+        <Alert>
           Failed to load reservations: {error instanceof Error ? error.message : 'unknown error'}
-        </p>
+        </Alert>
       )}
 
       {data && (
         <>
           {data.content.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-ink-line bg-ink-raised/60 p-10 text-center">
-              <p className="text-paper-dim">
-                No {filter} reservations.
-                {filter === 'upcoming' && " Browse what's showing to book some seats."}
-              </p>
-              {filter === 'upcoming' && (
-                <Link to="/" className={cn('mt-5 inline-flex', buttonClasses())}>
-                  Browse movies
-                </Link>
-              )}
-            </div>
+            <EmptyState
+              title={`No ${filter} tickets`}
+              action={
+                filter === 'upcoming' ? (
+                  <Link to="/" className={buttonClasses()}>
+                    Browse movies
+                  </Link>
+                ) : undefined
+              }
+            >
+              {filter === 'upcoming'
+                ? "Browse what's showing to book some seats."
+                : 'Past tickets will appear here.'}
+            </EmptyState>
           ) : (
             <ul className="space-y-3">
               {data.content.map((r) => (
