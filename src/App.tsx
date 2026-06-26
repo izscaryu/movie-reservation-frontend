@@ -6,7 +6,8 @@ import SeatPickerPage from './pages/SeatPickerPage';
 import HoldPage from './pages/HoldPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
-import { AdminPage, NotFoundPage, ReservationsPage } from './pages/placeholders';
+import ReservationsPage from './pages/ReservationsPage';
+import { AdminPage, NotFoundPage } from './pages/placeholders';
 import { RequireAdmin, RequireAuth } from './auth/guards';
 
 export default function App() {

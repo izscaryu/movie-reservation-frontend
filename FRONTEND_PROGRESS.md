@@ -57,7 +57,7 @@ Access token exp − iat = 900s (15 min). This is why the 401 refresh must be si
 - [x] Slice 3 — Browse (movies list + filter, detail, showtimes-by-date).
 - [x] Slice 4 — Seat picker + 409 which-seats-failed handling.
 - [x] Slice 5 — Hold countdown (display-only) + confirm + confirm-after-expiry 409.
-- [ ] Slice 6 — My reservations (paginated upcoming/past, cancel).
+- [x] Slice 6 — My reservations (paginated upcoming/past, cancel).
 - [ ] Slice 7 — Admin dashboard (movie CRUD, showtime create, 4 reports, admin reservations).
 - [ ] Slice 8 — Polish + README + two-tab overbooking demo.
 
@@ -162,3 +162,51 @@ The kickoff says the 409 "body names WHICH seats failed." It does, but as a
 comma-separated **label** list inside `message` (`"Seats not available: A1, A2"`), not a
 structured `seats` array and not by id. `parseUnavailableSeatLabels` extracts them; mapping
 label→`showtimeSeatId` is done against the freshly-refetched map.
+
+- Slice 6 (done, pushed): My reservations.
+  - `src/pages/ReservationsPage.tsx` (replaces the placeholder; route `/reservations` behind
+    `RequireAuth`): Upcoming/Past tabs (the `filter` query param), server-driven pagination
+    (`page`/`size=10`, Prev/Next gated on `first`/`last` — never compute totals client-side,
+    landmine #6), a status badge per row (CONFIRMED/PENDING/CANCELLED/EXPIRED), and per-row
+    Cancel with an inline "Cancel this reservation? Yes / Keep" confirm step.
+  - **List-only by decision:** no Confirm action and no path that feeds a list row into
+    `HoldPage` (there's no `GET /api/reservations/{id}` to rebuild a hold anyway). The page
+    only lists + cancels.
+  - Cancel is offered only on the **Upcoming** tab for **PENDING + CONFIRMED** rows. The Past
+    tab is read-only history, so a started-showtime CONFIRMED is never offered for cancel.
+    On success the `['reservations']` query is invalidated (refetch). On 409/404 the list is
+    also refetched and the server message is surfaced (the row changed underneath us, e.g.
+    cancelled in another tab) — the server stays authoritative.
+  - `api/reservations.ts` already had `getMyReservations` + `cancelReservation` (built ahead
+    in earlier slices); Slice 6 is the page. `placeholders.tsx` lost its `ReservationsPage`
+    export; `App.tsx` imports the real page.
+
+### Live finding — `filter` splits by SHOWTIME TIME, not status; cancel matrix verified
+
+`/api/reservations/me?filter=upcoming|past` partitions by the showtime's time, **not** by
+reservation status. Verified live (admin user): `upcoming` returned 8 rows mixing `CONFIRMED`
+and `CANCELLED`; `past` was empty (all seed showtimes are in 2036). No `filter` == `upcoming`
+here. An **invalid** `filter` (`?filter=bogus`) returns **200**, not 400 (ignored) — the UI
+only ever sends the two valid values. Because a row's status is independent of the tab, the
+page shows a status badge and gates the Cancel button on status, not on the tab alone.
+
+Cancel (`DELETE /api/reservations/{id}`) verified live, recording the real results:
+- **PENDING** → `204 No Content` (empty body).
+- **CONFIRMED (future)** → `204 No Content` — the decision's open question; cancelling a
+  future CONFIRMED **is allowed**, and the row then reads `CANCELLED` in the list. This is
+  why Cancel is offered on CONFIRMED, not just PENDING.
+- **Re-cancel a CANCELLED/EXPIRED row** → `409 "Reservation N cannot be cancelled in its
+  current state"`. The UI gates this out, but a stale row can still hit it → refetch + show.
+- **Non-existent id** → `404 "No reservation with id: N"`.
+- `cancelReservation` returns `Promise<void>`; the 204 is handled by `parseResponse` (204 →
+  undefined). No response body to read.
+
+**Verification scope (honest):** the live checks were the API contract (login → list
+upcoming/past → paginate → the full cancel matrix above) plus `tsc`/`vite build`, `eslint`,
+and transforming `ReservationsPage.tsx` + `App.tsx` through the running Vite dev server (both
+200, valid JS, no error overlay). The rendered DOM was **not** driven/clicked in a real
+browser — no Playwright/Puppeteer in this repo, and no prior slice has done browser
+automation; "live" here means the same contract+build+transform bar used in Slices 3–5.
+Side effect of verification: seed reservations #105 (PENDING→cancelled) and #106
+(PENDING→CONFIRMED→cancelled) were created and cancelled on showtime 75; their seats were
+released, so no holds dangle.

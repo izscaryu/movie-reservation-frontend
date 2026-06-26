@@ -10,10 +10,6 @@ function Placeholder({ title, slice }: { title: string; slice: string }) {
   );
 }
 
-export function ReservationsPage() {
-  return <Placeholder title="My reservations" slice="Slice 6" />;
-}
-
 export function AdminPage() {
   return <Placeholder title="Admin dashboard" slice="Slice 7" />;
 }
