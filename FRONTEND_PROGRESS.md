@@ -59,7 +59,7 @@ Access token exp − iat = 900s (15 min). This is why the 401 refresh must be si
 - [x] Slice 5 — Hold countdown (display-only) + confirm + confirm-after-expiry 409.
 - [x] Slice 6 — My reservations (paginated upcoming/past, cancel).
 - [x] Slice 7 — Admin dashboard (movie CRUD, showtime create, 4 reports, admin reservations).
-- [ ] Slice 8 — Polish + README + two-tab overbooking demo.
+- [x] Slice 8 — Polish + README + two-tab overbooking demo.
 
 Out of scope (v1): realtime/websocket seat updates (poll / refresh-on-conflict),
 payment, email, i18n, SSR.
@@ -512,3 +512,67 @@ closes.
 **Parts 1–3 complete.** Remaining: Part 4 (two-tab overbooking demo + Playwright GIF — first browser
 driver in the repo; rehearse manually, then gate so the GIF can be watched). `/style` still mounted;
 remove/gate as part of closing the slice.
+
+- Slice 8 — **Part 4 (done, pushed)** — closes Slice 8: two-tab overbooking demo + Playwright GIF —
+  the first browser driver in the repo. Scoped deliberately (two files: `e2e/smoke.e2e.ts` light smoke +
+  `e2e/overbooking.e2e.ts` the demo capture; `playwright.config.ts`), NOT a sprawling E2E suite —
+  the project still verifies behavior at the contract level. The capture mints a fresh showtime per
+  run (admin API, random readable 2037 slot with retry-on-overlap) so the room is always clean
+  (confirming books seats; there's no delete-showtime endpoint), auths two real users (demo-a /
+  demo-b) by seeding their refresh token into `localStorage` (no login footage), then drives the race
+  in two isolated contexts and screenshots each beat. A throwaway `ffmpeg` step composed the beats
+  side-by-side (TAB A | TAB B banners, top-aligned panes so the app header lines up, per-beat dwell —
+  ~5.5s on the 409, the headline) into **`docs/overbooking-demo.gif`** (the committed artifact, 153 KB,
+  7 beats, 24s). The 🎟️ in the confirmed heading was dropped (it rendered as a stray red glyph in
+  headless Chromium — a fragile cross-environment emoji; the green `CONFIRMED` badge already carries
+  the moment).
+
+### ⚠️ Live finding (Part 4) — the HEADLINE feature was broken; caught only by the first real browser drive
+
+The whole point of the 409 path is *"the lost seat re-renders **HELD**."* It **didn't.** On the 409 the
+ring + "C7 was just taken. Pick again." copy appeared (both driven by component state), but the seat
+stayed **dark/AVAILABLE** — it never flipped to HELD. Cause: the conflict handler refetches the seat map
+via `queryClient.fetchQuery`, but the global `queryClient` sets **`staleTime: 30_000`**, so `fetchQuery`
+returned the **cached** map (C7 still AVAILABLE) instead of hitting the network. The backend was correct
+the whole time (verified live: A holds C7 → 201; B holds C7 → 409 `"Seats not available: C7"`; map shows
+C7 `HELD`). The bug was purely client-side: a **cache × render interaction**.
+
+Why it survived every prior slice: it lives **above** the contract/unit-test line. Slices 4–7 verified
+the API contract + `tsc`/`eslint`/`vitest` + Vite transforms, but **never drove the rendered DOM** (the
+progress notes said so each time). The seat-map GET is correct in isolation; only the *cached refetch on
+conflict* is wrong, and that only manifests in a live browser with a warmed cache. **Part 4's browser
+drive is the first thing that could have caught it — and did, on the first run.**
+
+Fix (`src/pages/SeatPickerPage.tsx`): `staleTime: 0` on the conflict `fetchQuery` — force a real refetch.
+This is the refresh-on-conflict design, not a patch: **the conflict IS the freshness signal.** Guarded
+two ways so a future global-config change can't silently re-break it: (1) a load-bearing comment + a
+**dev-only tripwire** that `console.warn`s if the "fresh" map still shows a reportedly-taken seat as
+AVAILABLE (i.e. a cache hit), and (2) `e2e/overbooking.e2e.ts` asserts the `HELD` flip at the browser
+level. After the fix the seat flips to HELD (ocher + hatch) + vermilion ring, exactly as the README claims.
+
+### Decision (Part 4) — Playwright pinned to 1.48.2 (Node-18 ESM/TS landmine)
+
+Latest Playwright (1.61) throws `ERR_UNKNOWN_FILE_EXTENSION` on the `.ts` config under this repo's
+`"type":"module"` + **Node 18.17.1**: its TS-under-ESM loader needs Node ≥18.19 (`module.register`).
+Pinned **`@playwright/test@1.48.2`** (engines `>=18`, older transpile path) which loads `.ts` fine on
+18.17.1. (ffmpeg for the GIF: no system ffmpeg, so `ffmpeg-static` as a transient dev tool — the GIF is
+a recording of finished work, kept out of the long-term dependency surface.)
+
+**Dependency surface after Part 4:** kept `@playwright/test` + the two `.e2e.ts` files +
+`playwright.config.ts` (the smoke pass stays runnable: `npm run e2e`). Dropped `ffmpeg-static` and the
+throwaway `e2e/build-gif.mjs` once the GIF was built — the artifact ships, the heavy capture-only tooling
+doesn't. All e2e output (`e2e/output/`, `test-results/`, `playwright-report/`) is gitignored; only
+`docs/overbooking-demo.gif` is committed.
+
+**`/style` removed.** The temporary design-foundation preview (`StylePreviewPage`, mounted at `/style`
+since Part 1a as living reference for the restyle review) is deleted along with its route — it was
+scaffolding, not something that should ship in a portfolio build.
+
+**Verification (Part 4):** the capture itself is the proof — it drives two real authenticated browser
+contexts against the live backend and **asserts** the deterministic race (A `POST /api/reservations` →
+201; B → 409 `"Seats not available: C7"`; C7 flips `HELD` + vermilion ring + "pick again"; B re-picks C8
+→ 201; both confirm → no double-book). Plus `tsc -b && vite build` clean (127 modules after `/style`
+removal), `eslint` clean, `vitest` 11/11 (auth/TZ/409-parse regressions green). The README placeholder now
+embeds the GIF with an honest caption (live Playwright capture, not a mockup).
+
+**Slice 8 complete (Parts 1–4). The frontend SPA is feature-complete per the planned scope.**

@@ -17,6 +17,12 @@ dist-ssr
 .env.*
 !.env.example
 
+# Playwright / e2e capture output (only docs/overbooking-demo.gif is committed)
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/e2e/output/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -90,7 +90,7 @@ export default function HoldPage() {
     return (
       <div className="mx-auto max-w-sm">
         <h1 className="mb-5 text-center font-display text-2xl font-semibold text-paper">
-          You're in 🎟️
+          You're in
         </h1>
         <TicketStub
           admit={r.seats.length}

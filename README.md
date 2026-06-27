@@ -88,7 +88,9 @@ answer here:
 
 No seat is ever shown sold twice; the loser is never dead-ended.
 
-<!-- Part 4: two-tab overbooking GIF (docs/overbooking-demo.gif) lands here. -->
+![Two browser tabs side by side on the same showtime. Both select seat C7. Tab A holds it first and confirms a ticket; Tab B clicks Hold a beat later, gets the 409, and C7 re-renders HELD with a vermilion ring and "C7 was just taken. Pick again." — then B recovers by picking C8 and confirms. Both end with a ticket; the seat is never double-booked.](docs/overbooking-demo.gif)
+
+<sub>Captured live with Playwright — two real browser contexts, two users (`demo-a` / `demo-b`), driven against the running backend. Not a mockup. **Left:** the winner. **Right:** the 409 and the recovery.</sub>
 
 ### Try it yourself (two tabs)
 

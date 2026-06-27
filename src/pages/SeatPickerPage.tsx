@@ -68,7 +68,32 @@ export default function SeatPickerPage() {
         const refreshed = await queryClient.fetchQuery({
           queryKey: seatMapKey,
           queryFn: () => getSeatMap(id),
+          // staleTime:0 is LOAD-BEARING, do not remove. The global queryClient
+          // sets staleTime:30s; without this override fetchQuery returns the
+          // CACHED map and the lost seats never flip to HELD — the entire
+          // refresh-on-conflict headline silently breaks. It's a cache+render
+          // interaction that sits ABOVE the contract/unit tests (invisible to
+          // them); it was only caught when the two-tab Playwright demo first drove
+          // a real browser. The conflict IS the freshness signal: always refetch.
+          staleTime: 0,
         });
+        // Guard so a future global-config change can't silently re-break the above:
+        // if the server said these seats are taken but the "fresh" map still shows
+        // one AVAILABLE, the refetch was served from cache. Make it loud in dev
+        // rather than shipping a broken headline. (e2e/overbooking.e2e.ts is the
+        // browser-level guard; this is the always-on dev tripwire.)
+        if (import.meta.env.DEV) {
+          const stillFree = refreshed.seats.filter(
+            (s) => lostSet.has(s.label) && s.status === 'AVAILABLE',
+          );
+          if (stillFree.length) {
+            console.warn(
+              '[seat-conflict] refetch returned STALE data — seats reported taken are still AVAILABLE:',
+              stillFree.map((s) => s.label),
+              '\nThe conflict refetch must bypass the global staleTime (see staleTime:0 above).',
+            );
+          }
+        }
         // Remove the lost seats from the selection (match by label via the fresh map).
         const lostIds = new Set(
           refreshed.seats.filter((s) => lostSet.has(s.label)).map((s) => s.showtimeSeatId),
